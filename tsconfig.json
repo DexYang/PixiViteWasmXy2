@@ -16,6 +16,12 @@
 		"noImplicitReturns": true,
 		"skipLibCheck": true,
 		"noImplicitAny": true,
+		"forceConsistentCasingInFileNames": true,
+		"strictPropertyInitialization": false,
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["src/*"]
+		}
 	},
-	"include": ["src"]
+	"include": ["src", "public/wasmxy2.js"]
 }

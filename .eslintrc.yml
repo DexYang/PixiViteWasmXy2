@@ -4,11 +4,11 @@
   extends:
     [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended"
+      "plugin:@typescript-eslint/recommended"
     ],
   rules: { 
     "quotes": [2, "double"], 
     "indent": ["warn", 2, { "SwitchCase": 1 }],
+    "semi": [2, 'never']
   }
 }

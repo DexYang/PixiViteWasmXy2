@@ -1,8 +1,14 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vite"
+import path from "node:path"
 
 export default defineConfig({
   build: {
     target: "esnext",
+  },
+  resolve: {
+    alias: {
+      "~/": `${path.resolve(__dirname, "src")}/`
+    }
   },
   server: {
     port: 3000,
@@ -12,4 +18,4 @@ export default defineConfig({
     host: true,
     port: 8080,
   },
-});
+})

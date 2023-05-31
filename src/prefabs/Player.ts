@@ -1,8 +1,8 @@
-import gsap from "gsap";
-import { Container } from "pixi.js";
-import Animation from "./Animation";
-import Keyboard from "../core/Keyboard";
-import { wait } from "../utils/misc";
+import gsap from "gsap"
+import { Container } from "pixi.js"
+import Animation from "./Animation"
+import Keyboard from "../core/Keyboard"
+import { wait } from "../utils/misc"
 
 enum Directions {
   LEFT = -1,
@@ -20,9 +20,9 @@ type AnimState = {
  * Example class showcasing the usage of the```Animation``` and ```Keyboard``` classes
  */
 export class Player extends Container {
-  private keyboard = Keyboard.getInstance();
-  anim: Animation;
-  currentState: AnimState | null = null;
+  private keyboard = Keyboard.getInstance()
+  anim: Animation
+  currentState: AnimState | null = null
 
   static animStates: Record<string, AnimState> = {
     idle: {
@@ -47,7 +47,7 @@ export class Player extends Container {
       loop: false,
       speed: 1,
     },
-  };
+  }
 
   config = {
     speed: 10,
@@ -63,7 +63,7 @@ export class Player extends Container {
       speedMultiplier: 6,
       duration: 0.1,
     },
-  };
+  }
 
   state = {
     jumping: false,
@@ -72,48 +72,48 @@ export class Player extends Container {
       x: 0,
       y: 0,
     },
-  };
+  }
 
-  private decelerationTween?: gsap.core.Tween;
+  private decelerationTween?: gsap.core.Tween
 
   constructor() {
-    super();
+    super()
 
-    this.anim = new Animation("wizard");
+    this.anim = new Animation("wizard")
 
-    this.addChild(this.anim);
+    this.addChild(this.anim)
 
-    this.setState(Player.animStates.idle);
+    this.setState(Player.animStates.idle)
 
     this.keyboard.onAction(({ action, buttonState }) => {
-      if (buttonState === "pressed") this.onActionPress(action);
-      else if (buttonState === "released") this.onActionRelease(action);
-    });
+      if (buttonState === "pressed") this.onActionPress(action)
+      else if (buttonState === "released") this.onActionRelease(action)
+    })
   }
 
   setState(state: AnimState) {
-    this.currentState = state;
+    this.currentState = state
 
-    return this.anim.play(state);
+    return this.anim.play(state)
   }
 
   private onActionPress(action: keyof typeof Keyboard.actions) {
     switch (action) {
       case "LEFT":
-        this.move(Directions.LEFT);
-        break;
+        this.move(Directions.LEFT)
+        break
       case "RIGHT":
-        this.move(Directions.RIGHT);
-        break;
+        this.move(Directions.RIGHT)
+        break
       case "JUMP":
-        this.jump();
-        break;
+        this.jump()
+        break
       case "SHIFT":
-        this.dash();
-        break;
+        this.dash()
+        break
 
       default:
-        break;
+        break
     }
   }
 
@@ -122,110 +122,110 @@ export class Player extends Container {
       (action === "LEFT" && this.state.velocity.x < 0) ||
       (action === "RIGHT" && this.state.velocity.x > 0)
     ) {
-      this.stopMovement();
+      this.stopMovement()
     }
   }
 
   get jumping() {
-    return this.state.jumping;
+    return this.state.jumping
   }
 
   private set jumping(value: boolean) {
-    this.state.jumping = value;
-    this.updateAnimState();
+    this.state.jumping = value
+    this.updateAnimState()
   }
 
   private set dashing(value: boolean) {
-    this.state.dashing = value;
-    this.updateAnimState();
+    this.state.dashing = value
+    this.updateAnimState()
   }
 
   get dashing() {
-    return this.state.dashing;
+    return this.state.dashing
   }
 
   private updateAnimState() {
-    const { walk, jump, dash, idle } = Player.animStates;
+    const { walk, jump, dash, idle } = Player.animStates
 
     if (this.dashing) {
-      if (this.currentState === dash) return;
+      if (this.currentState === dash) return
 
-      this.setState(dash);
+      this.setState(dash)
     } else if (this.jumping) {
-      if (this.currentState === jump || this.currentState === dash) return;
+      if (this.currentState === jump || this.currentState === dash) return
 
-      this.setState(jump);
+      this.setState(jump)
     } else if (this.state.velocity.x !== 0) {
-      if (this.currentState === walk) return;
+      if (this.currentState === walk) return
 
-      this.setState(walk);
+      this.setState(walk)
     } else {
-      if (this.currentState === idle) return;
+      if (this.currentState === idle) return
 
-      this.setState(idle);
+      this.setState(idle)
     }
   }
 
   stopMovement() {
-    this.decelerationTween?.progress(1);
+    this.decelerationTween?.progress(1)
 
     this.decelerationTween = gsap.to(this.state.velocity, {
       duration: this.config.decelerateDuration,
       x: 0,
       ease: "power1.in",
       onComplete: () => {
-        this.updateAnimState();
+        this.updateAnimState()
       },
-    });
+    })
   }
 
   async move(direction: Directions) {
-    if (this.dashing) return;
+    if (this.dashing) return
 
-    this.decelerationTween?.progress(1);
+    this.decelerationTween?.progress(1)
 
-    this.state.velocity.x = direction * this.config.speed;
+    this.state.velocity.x = direction * this.config.speed
 
-    this.updateAnimState();
+    this.updateAnimState()
 
     gsap.to(this.scale, {
       duration: this.config.turnDuration,
       x: this.config.scale * direction,
-    });
+    })
   }
 
   async dash() {
-    if (this.state.velocity.x === 0) return;
+    if (this.state.velocity.x === 0) return
 
-    this.dashing = true;
+    this.dashing = true
 
-    this.decelerationTween?.progress(1);
+    this.decelerationTween?.progress(1)
 
     this.state.velocity.x =
       this.config.speed *
       this.config.dash.speedMultiplier *
-      this.getDirection();
+      this.getDirection()
 
-    await wait(this.config.dash.duration);
+    await wait(this.config.dash.duration)
 
-    this.state.velocity.x = this.config.speed * this.getDirection();
+    this.state.velocity.x = this.config.speed * this.getDirection()
 
-    this.dashing = false;
+    this.dashing = false
   }
 
   private getDirection() {
     if (this.state.velocity.x === 0)
-      return this.scale.x > 0 ? Directions.RIGHT : Directions.LEFT;
+      return this.scale.x > 0 ? Directions.RIGHT : Directions.LEFT
 
-    return this.state.velocity.x > 0 ? Directions.RIGHT : Directions.LEFT;
+    return this.state.velocity.x > 0 ? Directions.RIGHT : Directions.LEFT
   }
 
   async jump() {
-    if (this.jumping) return;
+    if (this.jumping) return
 
-    const { height, duration, ease } = this.config.jump;
+    const { height, duration, ease } = this.config.jump
 
-    this.jumping = true;
+    this.jumping = true
 
     await gsap.to(this, {
       duration,
@@ -234,8 +234,8 @@ export class Player extends Container {
       yoyo: true,
       yoyoEase: `${ease}.in`,
       repeat: 1,
-    });
+    })
 
-    this.jumping = false;
+    this.jumping = false
   }
 }
