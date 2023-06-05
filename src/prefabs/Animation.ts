@@ -1,40 +1,40 @@
-import { sound } from "@pixi/sound";
-import { AnimatedSprite, Container } from "pixi.js";
-import { spritesheets } from "../core/AssetLoader";
+import { sound } from "@pixi/sound"
+import { AnimatedSprite, Container } from "pixi.js"
+import { spritesheets } from "../core/AssetLoader"
 
 export default class Animation extends Container {
-  animationTextures: (typeof spritesheets)[""]["animations"];
-  sprite: AnimatedSprite | undefined;
-  speed = 1;
+  animationTextures: (typeof spritesheets)[""]["animations"]
+  sprite: AnimatedSprite | undefined
+  speed = 1
 
-  animations = new Map<string, AnimatedSprite>();
+  animations = new Map<string, AnimatedSprite>()
 
-  currentAnimation: string | null = null;
+  currentAnimation: string | null = null
 
   constructor(name: string, speed = 1) {
-    super();
+    super()
 
-    this.name = name;
-    this.speed = speed;
-    this.animationTextures = spritesheets[name].animations;
+    this.name = name
+    this.speed = speed
+    this.animationTextures = spritesheets[name].animations
   }
 
   private initAnimation(anim: string) {
-    const textures = this.animationTextures[anim];
+    const textures = this.animationTextures[anim]
 
     if (!textures) {
-      console.error(`Animation ${anim} not found`);
+      console.error(`Animation ${anim} not found`)
 
-      return;
+      return
     }
 
-    const sprite = new AnimatedSprite(textures);
+    const sprite = new AnimatedSprite(textures)
 
-    sprite.name = anim;
-    sprite.anchor.set(0.5);
-    sprite.animationSpeed = this.speed;
+    sprite.name = anim
+    sprite.anchor.set(0.5)
+    sprite.animationSpeed = this.speed
 
-    return sprite;
+    return sprite
   }
 
   play({
@@ -49,39 +49,39 @@ export default class Animation extends Container {
     speed?: number;
   }) {
     if (this.sprite) {
-      this.sprite.stop();
+      this.sprite.stop()
 
-      this.removeChild(this.sprite);
+      this.removeChild(this.sprite)
     }
 
-    this.sprite = this.animations.get(anim);
+    this.sprite = this.animations.get(anim)
 
     if (!this.sprite) {
-      this.sprite = this.initAnimation(anim);
+      this.sprite = this.initAnimation(anim)
 
-      if (!this.sprite) return;
+      if (!this.sprite) return
 
-      this.animations.set(anim, this.sprite);
+      this.animations.set(anim, this.sprite)
     }
 
-    this.currentAnimation = anim;
+    this.currentAnimation = anim
 
-    this.sprite.loop = loop;
-    this.sprite.animationSpeed = speed;
-    this.sprite.gotoAndPlay(0);
+    this.sprite.loop = loop
+    this.sprite.animationSpeed = speed
+    this.sprite.gotoAndPlay(0)
 
-    if (soundName) sound.play(soundName);
+    if (soundName) sound.play(soundName)
 
-    this.addChild(this.sprite);
+    this.addChild(this.sprite)
 
     return new Promise<void>((resolve) => {
-      if (!this.sprite) return resolve();
+      if (!this.sprite) return resolve()
 
       this.sprite.onComplete = () => {
-        this.currentAnimation = null;
+        this.currentAnimation = null
 
-        resolve();
-      };
-    });
+        resolve()
+      }
+    })
   }
 }

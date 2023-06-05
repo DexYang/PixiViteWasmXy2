@@ -1,6 +1,7 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
 import { Debug } from "../utils/debug"
 import { Texture, FORMATS } from "pixi.js"
+import { WorkerManager } from "./WorkerManager"
 
 const decoder = new TextDecoder("utf-8")
 
@@ -38,8 +39,10 @@ class Mask {
 }
 
 export class MapX {
-  res: ResourceLoader
-  path: string
+  id: string
+  res: ResourceLoader | null
+  wm: WorkerManager | null
+  path: string | null
   handle: FileSystemFileHandle | undefined
   buf: ArrayBuffer
   offset: number
@@ -63,12 +66,32 @@ export class MapX {
   jpeg_head: ArrayBuffer
   
   constructor(path: string) {
+    this.id = Math.random().toString()
     this.res = ResourceLoader.getInstance()
+    this.wm = WorkerManager.getInstance()
+    this.wm.register(this)
     this.path = path
     this.handle = this.res.getResource().get(this.path)
     this.offset = 0
     this.blocks = []
     this.masks = []
+  }
+
+  destroy() {
+    this.res = null
+    this.path = null
+    this.handle = undefined
+    this.offset = 0
+    this.blocks = []
+    this.masks = []
+    if (this.wm)
+      this.wm.remove(this)
+    this.wm = null
+  }
+
+  receive(event: any) {
+    // console.log(event.data)
+    // return Texture.fromBuffer(ret, 320, 240, { format: FORMATS.RGB})
   }
 
   async setup() {
@@ -182,52 +205,67 @@ export class MapX {
   //   // const mask = new Mask()
   // }
 
-  getJpeg(i: number): Texture {
+  getJpeg(i: number) {
     const block = this.blocks[i]
     let jpeg 
     jpeg = this.buf.slice(block.jpegOffset, block.jpegOffset + block.jpegSize)
     let ret
-    
     if (this.flag === "XPAM") {
       const size = this.jpeg_head.byteLength + block.jpegSize
       const uint8Array = new Uint8Array(size)
       uint8Array.set(new Uint8Array(this.jpeg_head))
       uint8Array.set(new Uint8Array(jpeg), this.jpeg_head.byteLength)
+      // uint8Array.byteLength
+      this.wm?.post({
+        method: "getMapx",
+        data: uint8Array,
+        blockIndex: i,
+        id: this.id
+      })
 
-      const inBuffer = Module._malloc(size)
-      Module.HEAP8.set(uint8Array, inBuffer)
-      const outSize = 320 * 240 * 3
-      const outBuffer = Module._malloc(outSize)
+      // const inBuffer = Module._malloc(size)
+      // Module.HEAP8.set(uint8Array, inBuffer)
+      // const outSize = 320 * 240 * 3
+      // const outBuffer = Module._malloc(outSize)
 
-      Module.ccall("read_map_x", 
-        Boolean,
-        [Number, Number, Number],
-        [inBuffer, size, outBuffer])
+      // Module.ccall("read_map_x", 
+      //   Boolean,
+      //   [Number, Number, Number],
+      //   [inBuffer, size, outBuffer])
 
-      ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
+      // ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
       
-      Module._free(inBuffer)
-      Module._free(outBuffer)
+      // Module._free(inBuffer)
+      // Module._free(outBuffer)
     } else if (this.flag === "0.1M") {
-      const size = block.jpegSize
       const uint8Array = new Uint8Array(jpeg)
 
-      const inBuffer = Module._malloc(size)
-      Module.HEAP8.set(uint8Array, inBuffer)
-      const outSize = 320 * 240 * 3
-      const outBuffer = Module._malloc(outSize)
+      this.wm?.post({
+        method: "getJpeg",
+        data: uint8Array,
+        blockIndex: i,
+        id: this.id
+      })
+      // const start1 = performance.now()
+      
+      // const inBuffer = Module._malloc(uint8Array.length)
+      // Module.HEAP8.set(uint8Array, inBuffer)
+      // const outSize = 320 * 240 * 3
+      // const outBuffer = Module._malloc(outSize)
 
-      Module.ccall("read_map_1", 
-        Boolean,
-        [Number, Number, Number],
-        [inBuffer, size, outBuffer])
+      // Module.ccall("read_map_1", 
+      //   Boolean,
+      //   [Number, Number, Number],
+      //   [inBuffer, uint8Array.length, outBuffer])
 
-      ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
-      Module._free(inBuffer)
-      Module._free(outBuffer)
+      // ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
+      // Module._free(inBuffer)
+      // Module._free(outBuffer)
+      // const end1 = performance.now()
+      // console.log("readU32 cost is", `${end1 - start1}ms`)
     }
     jpeg = null
-    return Texture.fromBuffer(ret, 320, 240, { format: FORMATS.RGB})
+    return ret
   }
 
   readBufToStr(start: number, end: number): string {
