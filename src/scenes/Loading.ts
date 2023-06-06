@@ -66,14 +66,52 @@ export default class Loading extends Scene {
   }
 
   async chooseLocalResources() {
-    const res = ResourceLoader.getInstance()
-    await res.load()
-    const mapx = await getMapX("newscene/1410.map")
-    const texture = mapx.getJpeg(0)
+    // const res = ResourceLoader.getInstance()
+    // await res.load()
+    // const mapx = await getMapX("newscene/1410.map")
+    // const texture = mapx.getJpeg(0)
     // const sprite = Sprite.from(texture)
     // this.addChild(sprite)
 
     // const wm = WorkerManager.getInstance()
+
+    // const inBuffer = Module._malloc(size)
+    // Module.HEAP8.set(uint8Array, inBuffer)
+    // const outSize = 320 * 240 * 3
+    // const outBuffer = Module._malloc(outSize)
+    const str = "cursor/a.tca"
+    const strBuffer = new TextEncoder().encode(str)
+    const strPointer = Module._malloc(strBuffer.length + 1)
+    Module.HEAP8.set(strBuffer, strPointer)
+    Module.HEAP8[strPointer + strBuffer.length] = 0 // 以 0 结尾
+
+    const b = Module._get_hash(strPointer)
+    console.log(b)
+    // console.log(new Uint8Array(Module.asm.memory.buffer, 0, 1024))
+    // 获取捕获输出的缓冲区
+    // const outputBuffer = new Uint8Array(Module.instance.exports.memory.buffer, 0, 1024)
+
+    // // 解析捕获的输出
+    // let i = 0
+    // let output = ""
+    // while (outputBuffer[i] !== 0) {
+    //   output += String.fromCharCode(outputBuffer[i])
+    //   i++
+    // }
+
+    // Module.getInstance().memory.buffer
+    
+
+    // 打印捕获的输出
+    // console.log(output)
+
+    
+    Module._free(strPointer)
+
+    // ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
+      
+    // Module._free(inBuffer)
+    // Module._free(outBuffer)
 
   }
 }
