@@ -1,9 +1,16 @@
-
+import { Texture, FORMATS, FrameObject, Point } from "pixi.js"
 
 const decoder = new TextDecoder("utf-8")
 
+export class Frame implements FrameObject {
+  texture: Texture
+  time: number
+}
+
 
 export class WAS {
+  buf: ArrayBuffer
+
   flag: string
   head_size: number
   
@@ -20,10 +27,11 @@ export class WAS {
 
   pal: ArrayBuffer
   pic_offsets: Array<number>
-  frames: Array<Array<unknown>>
+  frames: Array<Array<Frame>>
   seq: Array<number>
 
   constructor(buf: ArrayBuffer) {
+    this.buf = buf
     this.flag = this.readBufToStr(buf, 0, 2)
     this.head_size = this.readBufToU16(buf, 2)
 
@@ -37,9 +45,12 @@ export class WAS {
     this.y = this.readBufToU16(buf, 14)
 
     let offset = 16
-    if (this.head_size > 12) 
+    if (this.head_size > 12) {
+      this.seq = []
       for (let i = 0; i < this.head_size - 12; i++) 
         this.seq.push(this.readBufToU8(buf, offset + i))
+    }
+      
     offset += this.head_size - 12
 
     this.pal = buf.slice(offset, offset + 512)
@@ -50,23 +61,80 @@ export class WAS {
     for (let i = 0; i < this.pic_num; i++) {
       this.pic_offsets.push(this.readBufToU32(buf, offset + i * 4) + 4 + this.head_size)
     }
+  }
 
+  getPal() {
+    return this.pal
+  }
+
+  readFrames(pal = this.pal) {
     this.frames = []
+    const palBuffer = Module._malloc(256 * 4)
+    Module.HEAPU8.set(pal, palBuffer)
+
     for (let i = 0; i < this.direction_num; i++) {
       this.frames.push([])
       for (let j = 0; j < this.frame_num; j++) {
         const index = i * this.frame_num + j
         const frame_offset = this.pic_offsets[index]
         
+        const frame = new Frame()
+        const x = this.readBufToU32(this.buf, frame_offset)
+        const y = this.readBufToU32(this.buf, frame_offset + 4)
+        const w = this.readBufToU32(this.buf, frame_offset + 8)
+        const h = this.readBufToU32(this.buf, frame_offset + 12)
+
+        let frame_size
+        if (index < this.pic_num - 1) {
+          frame_size = this.pic_offsets[index + 1] - this.pic_offsets[index]
+        } else {
+          frame_size = this.buf.byteLength - this.pic_offsets[index]
+        }
+        const frame_buf = this.buf.slice(frame_offset, frame_offset + 16 + frame_size)
+
+        frame.texture = Texture.fromBuffer(
+          this.readFrame(frame_buf, palBuffer, w, h),
+          w,
+          h,
+          { format: FORMATS.RGBA }
+        )
+        frame.time = 100
+        
+        console.log(x, y)
+        frame.texture.defaultAnchor.set(x / w, y / h)
+
+        this.frames[i].push(frame)
       }
-    }   
+    } 
+    Module._free(palBuffer)
+    return this.frames
+  }
+
+  readFrame(buf: ArrayBuffer, palBuffer: number, w: number, h: number) {
+    const uint8Array = new Uint8Array(buf)
+    const inBuffer = Module._malloc(buf.byteLength)
+    Module.HEAP8.set(uint8Array, inBuffer)
+    const outSize = w * h * 4
+    const outBuffer = Module._malloc(outSize)
+
+    Module.ccall("read_frame", 
+      null,
+      [Number, Number, Number],
+      [inBuffer, palBuffer, outBuffer])
+
+    const res = Module.HEAPU8.slice(outBuffer, outBuffer + outSize)
+
+    Module._free(inBuffer)
+    Module._free(outBuffer)
+
+    return res
   }
 
   convertPal() {
     const uint8Array = new Uint8Array(this.pal)
     const inBuffer = Module._malloc(uint8Array.length)
     Module.HEAPU8.set(uint8Array, inBuffer)
-    const outSize = 256 * 3
+    const outSize = 256 * 4
     const outBuffer = Module._malloc(outSize)
 
     Module.ccall("read_color_pal", 

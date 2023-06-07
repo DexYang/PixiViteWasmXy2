@@ -143,17 +143,16 @@ _PIXEL RGB565to888(unsigned short color, unsigned char Alpha) {
 	return pixel;
 }
 
-uint8_t* readColorPal(uint8_t* lp) {
+void readColorPal(uint8_t* lp, uint8_t* out) {
 	unsigned short* short_lp = (unsigned short*)lp;
-	_PIXEL* Palette32 = new _PIXEL[256]; // 分配32bit调色板的空间
+	_PIXEL* Palette32 = (_PIXEL*) out; // 分配32bit调色板的空间
 	for (int k = 0; k < 256; k++) {
 		Palette32[k] = RGB565to888(*short_lp++, 0xff); // 16to32调色板转换
 	}
-	return (uint8_t*)Palette32;
 }
 
 
-uint8_t* readFrame(uint8_t* lp, uint32_t* pal) {
+void readFrame(uint8_t* lp, uint32_t* pal, uint8_t* out) {
 	uint8_t* data = (uint8_t*)lp;
 	FRAME* frame = (FRAME*)data;
 
@@ -164,7 +163,7 @@ uint8_t* readFrame(uint8_t* lp, uint32_t* pal) {
 	uint8_t style, alpha, repeat;
 
 	uint32_t PixelCount = frame->Width * frame->Height; // 计算总像素值
-	uint32_t* wdata = new uint32_t[PixelCount];
+	uint32_t* wdata = (uint32_t*) out;
 	uint32_t* wdata2 = wdata;
 	uint8_t* BP = (uint8_t*)wdata;
 	memset(wdata, 0, PixelCount * 4);
@@ -239,6 +238,5 @@ uint8_t* readFrame(uint8_t* lp, uint32_t* pal) {
 			}
 		}
 	}
-	return BP;
 }
 

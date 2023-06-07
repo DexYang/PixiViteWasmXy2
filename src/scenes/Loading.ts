@@ -1,10 +1,11 @@
-import { Text, Graphics } from "pixi.js"
+import { Text, Graphics, AnimatedSprite } from "pixi.js"
 import { FancyButton } from "@pixi/ui"
 import Scene from "../core/Scene"
 import { ResourceLoader } from "~/core/ResourceLoader"
 
-import { getMapX } from "~/lib/MapX"
-import { centerObject } from "~/utils/misc"
+// import { getMapX } from "~/lib/MapX"
+import { centerObject, centerObjects } from "~/utils/misc"
+import { WDFManager } from "~/lib/WDFManager"
 
 export default class Loading extends Scene {
   name = "Loading"
@@ -47,6 +48,7 @@ export default class Loading extends Scene {
     this.header_text = new Text("大话西游II", {
       fontSize: 12,
       fill: "gray",
+      
     })
 
     // text
@@ -66,8 +68,8 @@ export default class Loading extends Scene {
   }
 
   async chooseLocalResources() {
-    // const res = ResourceLoader.getInstance()
-    // await res.load()
+    const res = ResourceLoader.getInstance()
+    await res.load()
     // const mapx = await getMapX("newscene/1410.map")
     // const texture = mapx.getJpeg(0)
     // const sprite = Sprite.from(texture)
@@ -79,14 +81,7 @@ export default class Loading extends Scene {
     // Module.HEAP8.set(uint8Array, inBuffer)
     // const outSize = 320 * 240 * 3
     // const outBuffer = Module._malloc(outSize)
-    const str = "cursor/a.tca"
-    const strBuffer = new TextEncoder().encode(str)
-    const strPointer = Module._malloc(strBuffer.length + 1)
-    Module.HEAP8.set(strBuffer, strPointer)
-    Module.HEAP8[strPointer + strBuffer.length] = 0 // 以 0 结尾
 
-    const b = Module._get_hash(strPointer)
-    console.log(b)
     // console.log(new Uint8Array(Module.asm.memory.buffer, 0, 1024))
     // 获取捕获输出的缓冲区
     // const outputBuffer = new Uint8Array(Module.instance.exports.memory.buffer, 0, 1024)
@@ -105,9 +100,27 @@ export default class Loading extends Scene {
     // 打印捕获的输出
     // console.log(output)
 
+    const wdfManager = WDFManager.getInstance()
+    const was = await wdfManager.get("gires.wdf", "cursor/a.tca")
+    const frames = was.readFrames()
     
-    Module._free(strPointer)
+    const as = new AnimatedSprite(frames[0])
 
+    as.updateAnchor = true
+    as.anchor.set(was?.x / was?.width, was?.y / was?.height)
+
+    as.x = 300
+    as.y = 300
+    as.play()
+
+    // this.scene_manager.app.renderer.events.cursorStyles.default = "none"
+
+    this.addChild(as)
+    this.scene_manager.app.stage.interactive = true
+    this.scene_manager.app.stage.addEventListener("mousemove", (e) => {
+      console.log(e)
+      as.position.copyFrom(e.global)
+    })
     // ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
       
     // Module._free(inBuffer)

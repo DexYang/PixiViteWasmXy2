@@ -10,6 +10,8 @@ export interface SceneUtils {
 }
 
 export default class SceneManager {
+  private static instance: SceneManager
+
   private sceneConstructors = this.importScenes()
 
   app: Application
@@ -17,13 +19,15 @@ export default class SceneManager {
   currentScene?: Scene
 
   constructor() {
+    console.log(window.devicePixelRatio)
     this.app = new Application({
       view: document.querySelector("#app") as HTMLCanvasElement,
       autoDensity: true,
       resizeTo: window,
       powerPreference: "high-performance",
       backgroundColor: 0x23272a,
-      resolution: window.devicePixelRatio || 1
+      antialias: true,
+      resolution: 1
     })
 
     window.addEventListener("resize", (ev: UIEvent) => {
@@ -94,5 +98,13 @@ export default class SceneManager {
     if (scene.load) await scene.load()
 
     return scene
+  }
+
+  public static getInstance() {
+    if (!SceneManager.instance) {
+      SceneManager.instance = new SceneManager()
+    }
+      
+    return SceneManager.instance
   }
 }

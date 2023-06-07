@@ -1,4 +1,4 @@
-import { WDF } from "~/lib/WDF"
+import { WDF, getWDF } from "~/lib/WDF"
 
 
 export class WDFManager {
@@ -11,10 +11,10 @@ export class WDFManager {
     this.map = new Map()
   }
 
-  get(wdf: string, path_or_hash: string | number) {
+  async get(wdf: string, path_or_hash: string | number) {
     let wdf_instance
     if (!this.map.has(wdf)) {
-      wdf_instance = new WDF(wdf)
+      wdf_instance = await getWDF(wdf)
       this.map.set(wdf, wdf_instance)
     } else {
       wdf_instance = this.map.get(wdf)
@@ -36,8 +36,8 @@ export class WDFManager {
       hash = path_or_hash
     }
 
-    const item = wdf_instance?.get(hash)
-
+    const item = await wdf_instance?.get(hash)
+    return item
   }
   
       

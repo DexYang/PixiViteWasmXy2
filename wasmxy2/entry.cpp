@@ -25,11 +25,11 @@ uint32_t EMSCRIPTEN_KEEPALIVE get_hash(char* p) {
 }
 
 void EMSCRIPTEN_KEEPALIVE read_color_pal(uint8_t* in, uint8_t* out) {
-    out = readColorPal(in);
+    readColorPal(in, out);
 }
 
-void EMSCRIPTEN_KEEPALIVE read_frame(uint8_t* in, uint32_t* pal, uint8_t* out) {
-    out = readFrame(in, pal);
+void EMSCRIPTEN_KEEPALIVE read_frame(uint8_t* in, uint8_t* pal, uint8_t* out) {
+    readFrame(in, (uint32_t*)pal, out);
 }
 
 #ifdef __cplusplus

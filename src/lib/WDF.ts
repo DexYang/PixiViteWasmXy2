@@ -1,7 +1,8 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
 import { Debug } from "../utils/debug"
-import { Texture, FORMATS } from "pixi.js"
+import { AnimatedSprite, FrameObject } from "pixi.js"
 import { WorkerManager } from "./WorkerManager"
+import { WAS } from "./WAS"
 
 const decoder = new TextDecoder("utf-8")
 
@@ -38,7 +39,7 @@ export class WDF {
       this.file = await this.handle.getFile()
       let buf: ArrayBuffer | null = await this.file.slice(0, 12).arrayBuffer()
       const flag = this.readBufToStr(buf, 0, 4)
-      if (flag === "PFDW") {
+      if (flag !== "PFDW") {
         Debug.warn("Incorrect WDF Format: " + this.path)
         return
       }
@@ -47,6 +48,7 @@ export class WDF {
 
       const file = this.file.slice(offset, offset + this.n * 16)
       buf = await file.arrayBuffer()
+      this.map = new Map<number, Item>()
       for(let i = 0; i < this.n; i++) {
         const item = new Item()
         item.hash = this.readBufToU32(buf, i * 16)
@@ -65,7 +67,12 @@ export class WDF {
       return
     }
     const file = this.file.slice(item.offset, item.offset  + item.size)
-    const buf = await file.arrayBuffer()
+    let buf: ArrayBuffer | null = await file.arrayBuffer()
+    if (this.readBufToStr(buf, 0, 2) === "SP") { // TCP TCA WAS
+      const was = new WAS(buf)
+      return was
+    }
+    buf = null
     
   }
 
@@ -76,4 +83,10 @@ export class WDF {
   readBufToU32(buf: ArrayBuffer, offset: number): number {
     return new Uint32Array(buf.slice(offset, offset + 4))[0]
   }
+}
+
+export async function getWDF(path: string): Promise<WDF> {
+  const wdf = new WDF(path)
+  await wdf.setup()
+  return wdf
 }
