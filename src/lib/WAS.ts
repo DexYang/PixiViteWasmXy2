@@ -1,4 +1,5 @@
-import { Texture, FORMATS, FrameObject, Point } from "pixi.js"
+import { Texture, FORMATS, FrameObject } from "pixi.js"
+
 
 const decoder = new TextDecoder("utf-8")
 
@@ -67,7 +68,7 @@ export class WAS {
     return this.pal
   }
 
-  readFrames(pal = this.pal) {
+  readFrames(duration = 100, pal = this.pal) {
     this.frames = []
     const palBuffer = Module._malloc(256 * 4)
     Module.HEAPU8.set(pal, palBuffer)
@@ -98,7 +99,7 @@ export class WAS {
           h,
           { format: FORMATS.RGBA }
         )
-        frame.time = 100
+        frame.time = duration * this.seq[j]
         
         frame.texture.defaultAnchor.set(x / w, y / h)
 

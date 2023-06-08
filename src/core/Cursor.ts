@@ -1,4 +1,5 @@
 import { AnimatedSprite, Container } from "pixi.js"
+import config from "~/config"
 import { WDFManager } from "~/lib/WDFManager"
 import SceneManager from "./SceneManager"
 
@@ -38,7 +39,7 @@ export class Cursor extends Container {
     for (const mode in modes) {
       const was = await wdfManager.get(modes[mode][0], modes[mode][1])
       if (was !== undefined) {
-        const frames = was.readFrames()[0]
+        const frames = was.readFrames(config.ui_duration)[0]
         const ani = new AnimatedSprite(frames, true)
         this.modes[mode] = ani
         ani.updateAnchor = true

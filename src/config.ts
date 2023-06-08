@@ -1,23 +1,8 @@
-import type { BgConfig } from "./prefabs/ParallaxBackground"
 
 type Config = {
-  backgrounds: Record<string, BgConfig>;
+  ui_duration: number
 };
 
 export default {
-  backgrounds: {
-    forest: {
-      layers: [
-        "sky",
-        "clouds_1",
-        "rocks",
-        "clouds_2",
-        "ground_1",
-        "ground_2",
-        "ground_3",
-        "plant",
-      ],
-      panSpeed: 0.2,
-    },
-  },
+  ui_duration: 100
 } as Config
