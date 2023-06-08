@@ -1,4 +1,5 @@
 import { WDF, getWDF } from "~/lib/WDF"
+import { Debug } from "~/utils/debug"
 
 
 export class WDFManager {
@@ -19,7 +20,7 @@ export class WDFManager {
     } else {
       wdf_instance = this.map.get(wdf)
     }
-
+    
     let hash
     if (typeof path_or_hash === "string") {
       if (path_or_hash.startsWith("0x")) {
@@ -29,12 +30,27 @@ export class WDFManager {
         const strPointer = Module._malloc(strBuffer.length + 1)
         Module.HEAP8.set(strBuffer, strPointer)
         Module.HEAP8[strPointer + strBuffer.length] = 0 // 以 0 结尾
-        hash = Module._get_hash(strPointer)
+
+        const outPointer = Module._malloc(4)
+        // hash = Module._get_hash(strPointer)
+        Module.ccall("get_hash", 
+          null,
+          [Number, Number],
+          [strPointer, outPointer])
+
+        let buf = Module.HEAPU32.slice(outPointer / 4, outPointer / 4 + 1)
+
+        hash = new Uint32Array(buf)[0]
+
         Module._free(strPointer)
+        Module._free(outPointer)
+        buf = null
       }
     } else {
       hash = path_or_hash
     }
+
+    Debug.log("WDF资源读取[" + wdf + ":" + path_or_hash + "], hash: " + hash + "")
 
     const item = await wdf_instance?.get(hash)
     return item

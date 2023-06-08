@@ -20,8 +20,8 @@ bool EMSCRIPTEN_KEEPALIVE read_map_1(uint8_t* in, uint32_t inSize, uint8_t* out)
     return decode_map_jpeg(out, repairedSize, out, false);
 }
 
-uint32_t EMSCRIPTEN_KEEPALIVE get_hash(char* p) {
-    return StringId(StringAdjust(p));
+void EMSCRIPTEN_KEEPALIVE get_hash(char* p, uint32_t* out) {
+    *out = StringId(StringAdjust(p));
 }
 
 void EMSCRIPTEN_KEEPALIVE read_color_pal(uint8_t* in, uint8_t* out) {

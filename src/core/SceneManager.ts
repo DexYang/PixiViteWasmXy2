@@ -19,7 +19,6 @@ export default class SceneManager {
   currentScene?: Scene
 
   constructor() {
-    console.log(window.devicePixelRatio)
     this.app = new Application({
       view: document.querySelector("#app") as HTMLCanvasElement,
       autoDensity: true,

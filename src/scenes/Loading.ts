@@ -6,6 +6,8 @@ import { ResourceLoader } from "~/core/ResourceLoader"
 // import { getMapX } from "~/lib/MapX"
 import { centerObject, centerObjects } from "~/utils/misc"
 import { WDFManager } from "~/lib/WDFManager"
+import { stringify } from "querystring"
+import { Cursor } from "~/core/Cursor"
 
 export default class Loading extends Scene {
   name = "Loading"
@@ -47,8 +49,7 @@ export default class Loading extends Scene {
     // text
     this.header_text = new Text("大话西游II", {
       fontSize: 12,
-      fill: "gray",
-      
+      fill: "gray",  
     })
 
     // text
@@ -70,6 +71,8 @@ export default class Loading extends Scene {
   async chooseLocalResources() {
     const res = ResourceLoader.getInstance()
     await res.load()
+
+    this.addChild(Cursor.getInstance())
     // const mapx = await getMapX("newscene/1410.map")
     // const texture = mapx.getJpeg(0)
     // const sprite = Sprite.from(texture)
@@ -100,31 +103,6 @@ export default class Loading extends Scene {
     // 打印捕获的输出
     // console.log(output)
 
-    const wdfManager = WDFManager.getInstance()
-    const was = await wdfManager.get("gires.wdf", "cursor/a.tca")
-    const frames = was.readFrames()
-    
-    const as = new AnimatedSprite(frames[0])
-
-    as.updateAnchor = true
-    as.anchor.set(was?.x / was?.width, was?.y / was?.height)
-
-    as.x = 300
-    as.y = 300
-    as.play()
-
-    // this.scene_manager.app.renderer.events.cursorStyles.default = "none"
-
-    this.addChild(as)
-    this.scene_manager.app.stage.interactive = true
-    this.scene_manager.app.stage.addEventListener("mousemove", (e) => {
-      console.log(e)
-      as.position.copyFrom(e.global)
-    })
-    // ret = Module.HEAPU8.subarray(outBuffer, outBuffer + outSize)
-      
-    // Module._free(inBuffer)
-    // Module._free(outBuffer)
 
   }
 }

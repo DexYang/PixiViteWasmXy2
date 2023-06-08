@@ -69,9 +69,9 @@ export class WDF {
     const file = this.file.slice(item.offset, item.offset  + item.size)
     let buf: ArrayBuffer | null = await file.arrayBuffer()
     if (this.readBufToStr(buf, 0, 2) === "SP") { // TCP TCA WAS
-      const was = new WAS(buf)
-      return was
+      return new WAS(buf)
     }
+    
     buf = null
     
   }

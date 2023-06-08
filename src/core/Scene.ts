@@ -1,6 +1,6 @@
 import { Container } from "pixi.js"
 import type { SceneUtils } from "./SceneManager"
-import SceneManager from "./SceneManager";
+import SceneManager from "./SceneManager"
 
 export interface Scene {
   load?(): void | Promise<void>;

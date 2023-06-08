@@ -100,7 +100,6 @@ export class WAS {
         )
         frame.time = 100
         
-        console.log(x, y)
         frame.texture.defaultAnchor.set(x / w, y / h)
 
         this.frames[i].push(frame)
