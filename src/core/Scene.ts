@@ -1,4 +1,4 @@
-import { Container } from "pixi.js"
+import { Layer } from "@pixi/layers"
 import type { SceneUtils } from "./SceneManager"
 import SceneManager from "./SceneManager"
 
@@ -9,13 +9,14 @@ export interface Scene {
   onResize?(width: number, height: number): void;
 }
 
-export abstract class Scene extends Container {
+export abstract class Scene extends Layer implements Scene{
   abstract name: string;
 
-  scene_manager = SceneManager.getInstance()
+  sm = SceneManager.getInstance()
 
   constructor(protected utils: SceneUtils) {
     super()
+    this.sortableChildren = true
   }
 }
 

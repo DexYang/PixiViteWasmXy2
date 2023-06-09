@@ -1,5 +1,6 @@
 import { directoryOpen } from "browser-fs-access"
 
+
 export class ResourceLoader {
   private static instance: ResourceLoader
 

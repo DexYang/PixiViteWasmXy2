@@ -1,13 +1,9 @@
-import { Text, Graphics, AnimatedSprite } from "pixi.js"
+import { Text, Graphics } from "pixi.js"
 import { FancyButton } from "@pixi/ui"
 import Scene from "../core/Scene"
 import { ResourceLoader } from "~/core/ResourceLoader"
+import { centerObject } from "~/utils/misc"
 
-// import { getMapX } from "~/lib/MapX"
-import { centerObject, centerObjects } from "~/utils/misc"
-import { WDFManager } from "~/lib/WDFManager"
-import { stringify } from "querystring"
-import { Cursor } from "~/core/Cursor"
 
 export default class Loading extends Scene {
   name = "Loading"
@@ -63,16 +59,11 @@ export default class Loading extends Scene {
     this.addChild(this.graphics, this.header_text, this.body_text, this.button)
   }
 
-
-  async start() {
-    // ?
-  }
-
   async chooseLocalResources() {
     const res = ResourceLoader.getInstance()
     await res.load()
-
-    this.addChild(Cursor.getInstance())
+    await this.sm.switchScene("Start")
+    
     // const mapx = await getMapX("newscene/1410.map")
     // const texture = mapx.getJpeg(0)
     // const sprite = Sprite.from(texture)

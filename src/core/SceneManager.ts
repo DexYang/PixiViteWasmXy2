@@ -1,7 +1,10 @@
 import { Application } from "pixi.js"
+import { Layer, Stage } from "@pixi/layers"
 import Scene from "./Scene"
 import { Debug } from "../utils/debug"
 import AssetLoader from "./AssetLoader"
+import { Cursor } from "./Cursor"
+import { ResourceLoader } from "./ResourceLoader"
 
 if (import.meta.env.DEV) Debug.init()
 
@@ -14,9 +17,15 @@ export default class SceneManager {
 
   private sceneConstructors = this.importScenes()
 
+  private cursor: Cursor
+
   app: Application
   sceneInstances = new Map<string, Scene>()
   currentScene?: Scene
+
+  // cursor_layer: Layer
+  // scene_layer: Layer
+
 
   constructor() {
     this.app = new Application({
@@ -28,6 +37,17 @@ export default class SceneManager {
       antialias: true,
       resolution: 1
     })
+
+    this.app.stage = new Stage()
+    this.app.stage.sortableChildren = true
+    this.app.stage.eventMode = "auto"
+    this.app.stage.hitArea = this.app.screen
+
+    // this.cursor_layer = new Layer()
+    // this.cursor_layer.zOrder = 2
+    // this.scene_layer = new Layer()
+    // this.cursor_layer.zOrder = 1
+    // this.app.stage.addChild(this.cursor_layer, this.scene_layer)
 
     window.addEventListener("resize", (ev: UIEvent) => {
       const target = ev.target as Window
@@ -54,6 +74,7 @@ export default class SceneManager {
 
   async switchScene(sceneName: string, deletePrevious = true): Promise<Scene> {
     await this.removeScene(deletePrevious)
+    await this.loadCursor()
 
     this.currentScene = this.sceneInstances.get(sceneName)
 
@@ -62,7 +83,9 @@ export default class SceneManager {
     if (!this.currentScene)
       throw new Error(`Failed to initialize scene: ${sceneName}`)
 
+    this.currentScene.zIndex = 0
     this.app.stage.addChild(this.currentScene)
+    // this.app.stage.updateStage()
 
     if (this.currentScene.start) await this.currentScene.start()
 
@@ -97,6 +120,19 @@ export default class SceneManager {
     if (scene.load) await scene.load()
 
     return scene
+  }
+
+  async loadCursor() {
+    if (this.cursor) {
+      Debug.log("鼠标已加载")
+    } else if (!ResourceLoader.getInstance().loaded) {
+      Debug.log("直读资源未加载")
+    } else {
+      this.cursor = Cursor.getInstance()
+      this.cursor.zIndex = 999
+      this.app.stage.addChild(this.cursor)
+      Debug.log("鼠标已加载")
+    }
   }
 
   public static getInstance() {

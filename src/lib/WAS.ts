@@ -60,7 +60,11 @@ export class WAS {
 
     this.pic_offsets = []
     for (let i = 0; i < this.pic_num; i++) {
-      this.pic_offsets.push(this.readBufToU32(buf, offset + i * 4) + 4 + this.head_size)
+      const _offset = this.readBufToU32(buf, offset + i * 4)
+      if (_offset)
+        this.pic_offsets.push(_offset + 4 + this.head_size)
+      else
+        this.pic_offsets.push(_offset)
     }
   }
 
@@ -78,10 +82,13 @@ export class WAS {
       for (let j = 0; j < this.frame_num; j++) {
         const index = i * this.frame_num + j
         const frame_offset = this.pic_offsets[index]
-        
+        if (frame_offset === 0) {
+          this.frames[i].push(this.frames[i][this.frames[i].length - 1])
+          continue
+        } 
         const frame = new Frame()
-        const x = this.readBufToU32(this.buf, frame_offset)
-        const y = this.readBufToU32(this.buf, frame_offset + 4)
+        const x = this.readBufTo32(this.buf, frame_offset)
+        const y = this.readBufTo32(this.buf, frame_offset + 4)
         const w = this.readBufToU32(this.buf, frame_offset + 8)
         const h = this.readBufToU32(this.buf, frame_offset + 12)
 
@@ -89,6 +96,10 @@ export class WAS {
         if (index < this.pic_num - 1) {
           frame_size = this.pic_offsets[index + 1] - this.pic_offsets[index]
         } else {
+          frame_size = this.buf.byteLength - this.pic_offsets[index]
+        }
+
+        if (frame_size <= 0) {
           frame_size = this.buf.byteLength - this.pic_offsets[index]
         }
         const frame_buf = this.buf.slice(frame_offset, frame_offset + 16 + frame_size)
@@ -99,7 +110,7 @@ export class WAS {
           h,
           { format: FORMATS.RGBA }
         )
-        frame.time = duration * this.seq[j]
+        frame.time = this.seq && this.seq.length > 0 ? duration * this.seq[j] : duration
         
         frame.texture.defaultAnchor.set(x / w, y / h)
 
@@ -156,6 +167,10 @@ export class WAS {
 
   readBufToU32(buf: ArrayBuffer, offset: number): number {
     return new Uint32Array(buf.slice(offset, offset + 4))[0]
+  }
+
+  readBufTo32(buf: ArrayBuffer, offset: number): number {
+    return new Int32Array(buf.slice(offset, offset + 4))[0]
   }
 
   readBufToU16(buf: ArrayBuffer, offset: number): number {
