@@ -62,7 +62,7 @@ export default class Loading extends Scene {
   async chooseLocalResources() {
     const res = ResourceLoader.getInstance()
     await res.load()
-    await this.sm.switchScene("Start")
+    await this.sm.switchScene("World")
     
     // const mapx = await getMapX("newscene/1410.map")
     // const texture = mapx.getJpeg(0)

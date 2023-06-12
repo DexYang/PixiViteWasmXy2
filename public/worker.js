@@ -13,7 +13,7 @@ onmessage = function (event) {
 }
 
 function decodeJpeg(data, method) {
-  const start1 = performance.now()
+  // const start1 = performance.now()
 
   const inBuffer = Module._malloc(data.byteLength)
   Module.HEAPU8.set(data, inBuffer)
@@ -29,7 +29,7 @@ function decodeJpeg(data, method) {
 
   Module._free(inBuffer)
   Module._free(outBuffer)
-  const end1 = performance.now()
-  console.log("decodeJpeg cost is", `${end1 - start1}ms`)
+  // const end1 = performance.now()
+  // console.log("decodeJpeg cost is", `${end1 - start1}ms`)
   return ret
 }

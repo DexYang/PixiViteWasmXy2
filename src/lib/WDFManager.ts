@@ -24,7 +24,7 @@ export class WDFManager {
     let hash
     if (typeof path_or_hash === "string") {
       if (path_or_hash.startsWith("0x")) {
-        hash= Number.parseInt("0x12", 16)
+        hash= Number.parseInt(path_or_hash, 16)
       } else {
         const strBuffer = new TextEncoder().encode(path_or_hash)
         const strPointer = Module._malloc(strBuffer.length + 1)
@@ -50,7 +50,7 @@ export class WDFManager {
       hash = path_or_hash
     }
 
-    Debug.log("WDF资源读取[" + wdf + ":" + path_or_hash + "], hash: " + hash + "")
+    // Debug.log("WDF资源读取[" + wdf + ":" + path_or_hash + "], hash: " + hash + "")
 
     const item = await wdf_instance?.get(hash)
     return item

@@ -11,6 +11,9 @@ class Block {
   offset: number
   jpegOffset: number
   jpegSize: number
+  texture: Texture | null
+  requested = false
+  loaded = false
 
   constructor() {
     this.ownMasks = []
@@ -89,13 +92,13 @@ export class MapX {
     this.wm = null
   }
 
-  receive(event: any) {
-    // console.log(event.data)
-    // return Texture.fromBuffer(ret, 320, 240, { format: FORMATS.RGB})
+  receive(event) {
+    if (event.data.id && this.id === event.data.id) {
+      this.blocks[event.data.blockIndex].texture = Texture.fromBuffer(event.data.data, 320, 240, { format: FORMATS.RGB})
+    }
   }
 
   async setup() {
-    const start1 = performance.now()
     if (this.handle) {
       const file = await this.handle.getFile()
       this.buf = await file.arrayBuffer()
@@ -163,8 +166,6 @@ export class MapX {
         }
       }
     }
-    const end1 = performance.now()
-    console.log("readText cost is", `${end1 - start1}ms`)
     this.travel()
   }
 
@@ -265,6 +266,7 @@ export class MapX {
       // console.log("readU32 cost is", `${end1 - start1}ms`)
     }
     jpeg = null
+    block.requested = true
     return ret
   }
 
