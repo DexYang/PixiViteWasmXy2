@@ -21,6 +21,8 @@
     "@pixi/sound": "^5.0.0",
     "@pixi/ui": "^0.7.1",
     "@pixi/layers": "^2.0.1",
+    "pixi-viewport": "^5.0.1",
+    "pixi-cull": "^2.2.0",
     "gsap": "^3.11.4",
     "pixi.js": "^7.2.4",
     "browser-fs-access": "^0.34.1",
