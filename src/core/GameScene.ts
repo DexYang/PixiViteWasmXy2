@@ -1,5 +1,6 @@
 import Scene from "./Scene"
 import { Layer } from "@pixi/layers"
+import { Viewport } from "pixi-viewport"
 import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { getMapX, MapX } from "~/lib/MapX"
@@ -13,6 +14,8 @@ export abstract class GameScene extends Scene {
   window_layer: Layer
 
   mapx: MapX
+
+  window: Viewport
   
   onResize(): void {
     console.log(window.innerWidth, window.innerHeight)
@@ -27,6 +30,18 @@ export abstract class GameScene extends Scene {
     this.map_layer = new Layer()
     this.map_layer.zIndex = 0
     this.addChild(this.map_layer)
+ 
+    this.window = new Viewport({
+      worldWidth: this.mapx.width,
+      worldHeight: this.mapx.height,
+      events: this.sm.app.renderer.events
+    })
+    this.window.dirty = true
+    this.window.clamp({
+      direction: "all",
+      underflow: "center"
+    })
+    this.addChild(this.window)
     // this.shape_layer = new Layer()
     // this.ui_layer = new Layer()
     // this.window_layer = new Layer()
@@ -42,8 +57,7 @@ export abstract class GameScene extends Scene {
   }
 
   updateWindow() {
-    console.log("updateWindow")
-    const  { left, top, start_col, end_col, start_row, end_row } = this.getWindow(500 ,500)
+    const  { left, top, start_col, end_col, start_row, end_row } = this.getWindow(800 ,800)
     for (let i = start_row; i <= end_row; i++) {
       for (let j = start_col; j <= end_col; j++) {
         const block_index = i * this.mapx.col_num + j
@@ -59,7 +73,6 @@ export abstract class GameScene extends Scene {
           this.map_layer.addChild(block_sprite)
           block.texture = null
           block.loaded = true
-          console.log(this.map_layer)
         }
       }
     }

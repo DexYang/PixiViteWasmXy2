@@ -31,7 +31,6 @@ export class Cursor extends Container {
     super()
     this.mode = "default"
     this.modes = {}
-    this.setup()
   }
 
   async setup() {
@@ -67,11 +66,17 @@ export class Cursor extends Container {
   }
 
 
-  public static getInstance() {
+  public static async getInstance() {
     if (!Cursor.instance) {
       Cursor.instance = new Cursor()
+      await Cursor.instance.setup()
     }
-      
+    
     return Cursor.instance
   }
+}
+
+
+export async function getCursor(): Promise<Cursor> {
+  return await Cursor.getInstance()
 }

@@ -16,6 +16,12 @@ dependencies:
   gsap:
     specifier: ^3.11.4
     version: 3.11.4
+  pixi-cull:
+    specifier: ^2.2.0
+    version: 2.2.0(pixi.js@7.2.4)
+  pixi-viewport:
+    specifier: ^5.0.1
+    version: 5.0.1
   pixi.js:
     specifier: ^7.2.4
     version: 7.2.4(@pixi/utils@7.2.4)
@@ -476,7 +482,6 @@ packages:
 
   /@pixi/layers@2.0.1(@pixi/canvas-renderer@7.2.4)(@pixi/core@7.2.4)(@pixi/display@7.2.4):
     resolution: {integrity: sha512-bw1fB0tbQHick9xMWeovuRIgvezHWpBAkEGMwTKd7zIy8Nygg/uupzGddNF3rb+Lk1bq3+H5vejoA8v/mV9AMw==}
-    engines: {node: '>=16', npm: '>=8'}
     peerDependencies:
       '@pixi/canvas-renderer': ^7.0.0
       '@pixi/core': ^7.0.0
@@ -1512,6 +1517,18 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
     dev: true
+
+  /pixi-cull@2.2.0(pixi.js@7.2.4):
+    resolution: {integrity: sha512-Ngg9GbflBemRm2ASI3lqnMtARYJUx8n+71XzQzG8jexHVadnNZ/mdqYBUcdIpUITk5P5LW5tCJFn0QWgYMYeFw==}
+    peerDependencies:
+      pixi.js: ^6.0.0
+    dependencies:
+      pixi.js: 7.2.4(@pixi/utils@7.2.4)
+    dev: false
+
+  /pixi-viewport@5.0.1:
+    resolution: {integrity: sha512-fIILU9xztqGnhGF5SYfjn1Rir/7asWkJ8zSUay2hwzPrdGTWFtB4yiIlZDeFaLf7KHA04RRb2kI01Sy1kNksAw==}
+    dev: false
 
   /pixi.js@7.2.4(@pixi/utils@7.2.4):
     resolution: {integrity: sha512-nBH60meoLnHxoMFz17HoMxXS4uJpG5jwIdL+Gx2S11TzWgP3iKF+/WLOTrkSdyuQoQSdIBxVqpnYii0Wiox15A==}
