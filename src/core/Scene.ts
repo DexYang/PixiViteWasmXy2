@@ -15,8 +15,8 @@ export abstract class Scene extends Layer implements Scene{
   sm = SceneManager.getInstance()
 
   constructor(protected utils: SceneUtils) {
-    super()
-    this.sortableChildren = true
+      super()
+      this.sortableChildren = true
   }
 }
 

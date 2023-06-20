@@ -4,6 +4,9 @@ dependencies:
   '@pixi/layers':
     specifier: ^2.0.1
     version: 2.0.1(@pixi/canvas-renderer@7.2.4)(@pixi/core@7.2.4)(@pixi/display@7.2.4)
+  '@pixi/math-extras':
+    specifier: ^7.2.4
+    version: 7.2.4(@pixi/core@7.2.4)
   '@pixi/sound':
     specifier: ^5.0.0
     version: 5.0.0(@pixi/assets@7.2.4)(@pixi/core@7.2.4)
@@ -16,9 +19,6 @@ dependencies:
   gsap:
     specifier: ^3.11.4
     version: 3.11.4
-  pixi-cull:
-    specifier: ^2.2.0
-    version: 2.2.0(pixi.js@7.2.4)
   pixi-viewport:
     specifier: ^5.0.1
     version: 5.0.1
@@ -490,6 +490,14 @@ packages:
       '@pixi/canvas-renderer': 7.2.4(@pixi/core@7.2.4)
       '@pixi/core': 7.2.4
       '@pixi/display': 7.2.4(@pixi/core@7.2.4)
+    dev: false
+
+  /@pixi/math-extras@7.2.4(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-YBM4UBQbbGO01vcs4o8IiRBKXlvtjMMp0PS6kRNbe4kLhl66w5QUct4/nZT5MBUEWaIaA673Q+TWv/qTbOtYIQ==}
+    peerDependencies:
+      '@pixi/core': 7.2.4
+    dependencies:
+      '@pixi/core': 7.2.4
     dev: false
 
   /@pixi/math@7.2.4:
@@ -1517,14 +1525,6 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
     dev: true
-
-  /pixi-cull@2.2.0(pixi.js@7.2.4):
-    resolution: {integrity: sha512-Ngg9GbflBemRm2ASI3lqnMtARYJUx8n+71XzQzG8jexHVadnNZ/mdqYBUcdIpUITk5P5LW5tCJFn0QWgYMYeFw==}
-    peerDependencies:
-      pixi.js: ^6.0.0
-    dependencies:
-      pixi.js: 7.2.4(@pixi/utils@7.2.4)
-    dev: false
 
   /pixi-viewport@5.0.1:
     resolution: {integrity: sha512-fIILU9xztqGnhGF5SYfjn1Rir/7asWkJ8zSUay2hwzPrdGTWFtB4yiIlZDeFaLf7KHA04RRb2kI01Sy1kNksAw==}

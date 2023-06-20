@@ -17,27 +17,49 @@ export default class SceneManager {
 
     private sceneConstructors = this.importScenes()
 
-    private cursor: Cursor
+    cursor: Cursor
 
     app: Application
     sceneInstances = new Map<string, Scene>()
     currentScene?: Scene
+
+    scene_layer: Layer
+    tip_layer: Layer
+    cursor_layer: Layer
 
     constructor() {
         this.app = new Application({
             view: document.querySelector("#app") as HTMLCanvasElement,
             autoDensity: true,
             resizeTo: window,
-            powerPreference: "high-performance",
+            powerPreference: "default",
             backgroundColor: 0x23272a,
             antialias: true,
             resolution: 1
         })
 
+        document.oncontextmenu  = document.body.oncontextmenu = function(event) {
+            event.preventDefault()
+            
+            // console.log(event)
+        }
+
+        
+
         this.app.stage = new Stage()
         this.app.stage.sortableChildren = true
         this.app.stage.eventMode = "auto"
         this.app.stage.hitArea = this.app.screen
+
+        
+
+        this.tip_layer = new Layer()
+        this.tip_layer.zIndex = 1
+        this.app.stage.addChild(this.tip_layer)
+
+        this.cursor_layer = new Layer()
+        this.cursor_layer.zIndex = 2
+        this.app.stage.addChild(this.cursor_layer)
 
         window.addEventListener("resize", (ev: UIEvent) => {
             const target = ev.target as Window
@@ -73,8 +95,9 @@ export default class SceneManager {
         if (!this.currentScene)
             throw new Error(`Failed to initialize scene: ${sceneName}`)
 
-        this.currentScene.zIndex = 0
-        this.app.stage.addChild(this.currentScene)
+        this.scene_layer = this.currentScene
+        this.scene_layer.zIndex = 0
+        this.app.stage.addChild(this.scene_layer)
 
         if (this.currentScene.start) await this.currentScene.start()
 
@@ -115,13 +138,19 @@ export default class SceneManager {
         if (!ResourceLoader.getInstance().loaded) {
             Debug.log("直读资源未加载")
         } else {
-            this.app.stage.removeChild(this.cursor)
+            this.cursor_layer.removeChild(this.cursor)
+            // getCursor().then(cursor => {
+            //     this.cursor = cursor
+            //     this.cursor.zIndex = 999
+            //     this.cursor_layer.addChild(this.cursor)
+            //     Debug.log("鼠标已加载", this.cursor)
+            // })
             this.cursor = await getCursor()
             this.cursor.zIndex = 999
-
-            this.app.stage.addChild(this.cursor)
+            this.cursor_layer.addChild(this.cursor)
             Debug.log("鼠标已加载", this.cursor)
         }
+        return true
     }
 
     public static getInstance() {
