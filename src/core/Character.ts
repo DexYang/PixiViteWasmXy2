@@ -51,6 +51,7 @@ export class Character extends Container {
             if (this.target_list.length > 0) {
                 if (this.isOnTarget()) {
                     const temp = this.target_list.shift()
+                    console.log(temp)
                     if (temp) this.target = temp
                 }
                 this.calcDirection(this.target.x, this.target.y)
@@ -117,6 +118,7 @@ export class Character extends Container {
 
     move() {
         const vec = this.target.subtract(this.position).normalize()
+        if (isNaN(vec.x)  || isNaN(vec.y)) return
         const speed = this.is_running ? config.run_speed : config.walk_speed
         this.position.x += vec.x * speed
         this.position.y += vec.y * speed

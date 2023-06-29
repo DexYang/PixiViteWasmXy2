@@ -44,7 +44,7 @@ export class Cursor extends Container {
                 ani.updateAnchor = true
                 ani.anchor.set(was.x / was.width, was.y / was.height)
                 ani.play()
-                ani.visible = false
+                ani.visible = mode === "default"
                 ani.eventMode = "none"
                 this.addChild(ani)
             }
@@ -63,6 +63,7 @@ export class Cursor extends Container {
         this.sm.app.ticker.add(() => {
             this.position = this.sm.app.renderer.events.pointer
         })
+        return
     }
 
 
@@ -70,6 +71,7 @@ export class Cursor extends Container {
         if (!Cursor.instance) {
             Cursor.instance = new Cursor()
             await Cursor.instance.setup()
+            return Cursor.instance
         }
     
         return Cursor.instance

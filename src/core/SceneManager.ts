@@ -5,8 +5,11 @@ import { Debug } from "../utils/debug"
 import AssetLoader from "./AssetLoader"
 import { Cursor, getCursor } from "./Cursor"
 import { ResourceLoader } from "./ResourceLoader"
+import { Cull } from "@pixi-essentials/cull"
 
 if (import.meta.env.DEV) Debug.init()
+
+const cull = new Cull()
 
 export interface SceneUtils {
   assetLoader: AssetLoader;
@@ -44,6 +47,9 @@ export default class SceneManager {
             // console.log(event)
         }
 
+        this.app.renderer.on("prerender", () => {
+            cull.cull(this.app.renderer.screen)
+        })
         
 
         this.app.stage = new Stage()
@@ -58,12 +64,13 @@ export default class SceneManager {
         this.app.stage.addChild(this.tip_layer)
 
         this.cursor_layer = new Layer()
-        this.cursor_layer.zIndex = 2
+        this.cursor_layer.zIndex = 999999
+        this.cursor_layer.visible = true
         this.app.stage.addChild(this.cursor_layer)
 
         window.addEventListener("resize", (ev: UIEvent) => {
             const target = ev.target as Window
-
+            
             this.currentScene?.onResize?.(target.innerWidth, target.innerHeight)
         })
     }

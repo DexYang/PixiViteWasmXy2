@@ -1,7 +1,8 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
 import { Debug } from "../utils/debug"
-import { Texture, FORMATS } from "pixi.js"
+import { Texture, FORMATS, Point } from "pixi.js"
 import { WorkerManager } from "./WorkerManager"
+import PF from "pathfinding"
 
 const decoder = new TextDecoder("utf-8")
 
@@ -63,6 +64,11 @@ export class MapX {
 
     cell_row_num: number
     cell_col_num: number
+    cell: Array<Array<number>>
+    grid: PF.Grid
+    astar = new PF.AStarFinder({
+        diagonalMovement: PF.DiagonalMovement.Always
+    })
 
     blocks: Array<Block>
     masks: Array<Mask>
@@ -78,6 +84,7 @@ export class MapX {
         this.offset = 0
         this.blocks = []
         this.masks = []
+        this.cell = []
     }
 
     destroy() {
@@ -122,6 +129,12 @@ export class MapX {
             this.cell_col_num = this.width / 20
             this.cell_col_num = this.cell_col_num % 16 === 0 ? this.cell_col_num : this.cell_col_num + 16 - this.cell_col_num % 16
       
+            for (let i = 0; i < this.cell_row_num; i++) {
+                this.cell.push([])
+                for (let j = 0; j < this.cell_col_num; j++) {
+                    this.cell[i].push(0)
+                }
+            }
             for (let i = 0; i < this.block_num; i++) {
                 const block = new Block()
                 block.offset = this.readBufToU32(12 + i * 4)
@@ -167,6 +180,7 @@ export class MapX {
             }
         }
         this.travel()
+        this.grid = new PF.Grid(this.cell)
     }
 
     travel() {
@@ -191,7 +205,7 @@ export class MapX {
                     // this.read_old_mask(offset, size, i)
                     offset += size
                 } else if (flag === "LLEC") {
-                    // this.read_cell()
+                    this.read_cell(offset, size, i)
                     offset += size
                 } else if (flag === "GIRB" || flag === "BLOK" || flag === "KOLB") {
                     offset += size
@@ -200,6 +214,110 @@ export class MapX {
                 }
             }
         }
+    }
+
+    read_cell(offset: number, size: number, blockIndex: number) {
+        const row = Math.floor(blockIndex / this.col_num)
+        const col = Math.floor(blockIndex % this.col_num)
+        const uint8array = new Uint8Array(this.buf.slice(offset, offset + size))
+        let i = 0
+        let j = 0
+        let count = 0
+        while (count < size) {
+            const ii = row * 12 + i
+            const jj = col * 16 + j
+            this.cell[ii][jj] = uint8array[count]
+            j++
+            if (j >= 16) {
+                j = 0
+                i++
+            }
+            count++
+        }
+    }
+
+    path_find(x1, y1, x2, y2) {
+        const _x2 = Math.floor(x2 / 20)
+        const _y2 = Math.floor(y2 / 20)
+        const target = this.get_nearest_valid_point(_x2, _y2)
+        const path = this.astar.findPath(Math.floor(x1 / 20), Math.floor(y1 / 20), target[0], target[1], this.grid.clone())
+        const newPath = this.smoothenPath(this.grid, path)
+        const worldPath = newPath.map(item => new Point(item[0] * 20, item[1] * 20))
+        if (worldPath.length > 0) {
+            worldPath[0].x = x1
+            worldPath[0].y = y1
+            if (this.grid.getNodeAt(_x2, _y2).walkable) {
+                worldPath[worldPath.length - 1].x = x2
+                worldPath[worldPath.length - 1].y = y2
+            }
+        }
+        return worldPath
+    }
+
+    get_nearest_valid_point(x, y) {
+        if (!this.grid.isInside(x, y)) return [x, y]
+        if (this.grid.getNodeAt(x, y).walkable) return [x, y]
+        const _stack = [[x, y]]
+        const been = {}
+        const neighbors = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]]
+        while (_stack) {
+            const _point = _stack.shift()
+            if (!_point) break
+            if (this.grid.getNodeAt(_point[0], _point[1]).walkable)
+                return _point
+            been[_point[0].toString() + "," + _point[1].toString()] = 1
+            for (let i = 0; i < neighbors.length; i++) {
+                const temp = [_point[0] + neighbors[i][0], _point[1] + neighbors[i][1]]
+                if (been[temp[0].toString() + "," + temp[1].toString()]) 
+                    continue
+                if (this.grid.isInside(temp[0], temp[1])) {
+                    _stack.push(temp)
+                    been[temp[0].toString() + "," + temp[1].toString()] = 1
+                }
+            }
+        }
+        return [x, y]
+    }
+
+    smoothenPath(grid, path) {
+        const len = path.length
+        const  x0 = path[0][0],         // path start x
+            y0 = path[0][1],            // path start y
+            x1 = path[len - 1][0],      // path end x
+            y1 = path[len - 1][1]       // path end y
+        let sx, sy,                     // current start coordinate
+            ex, ey,                     // current end coordinate
+            i, j, coord, line, testCoord, blocked
+    
+        sx = x0
+        sy = y0
+        const newPath = [[sx, sy]]
+    
+        for (i = 2; i < len; ++i) {
+            coord = path[i]
+            ex = coord[0]
+            ey = coord[1]
+            line = PF.Util.interpolate(sx, sy, ex, ey)
+    
+            blocked = false
+            for (j = 1; j < line.length; ++j) {
+                testCoord = line[j]
+    
+                if (!grid.isWalkableAt(testCoord[0], testCoord[1])) {
+                    blocked = true
+                    break
+                }
+            }
+            if (blocked) {
+                const lastValidCoord = path[i - 1]
+                newPath.push(lastValidCoord)
+                sx = lastValidCoord[0]
+                sy = lastValidCoord[1]
+            }
+        }
+        newPath.push([x1, y1])
+    
+        return newPath
     }
 
     // read_old_mask(offset: number, size: number, block_index: number) {

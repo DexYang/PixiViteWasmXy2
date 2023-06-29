@@ -46,11 +46,6 @@ export abstract class GameScene extends Scene {
         this.map_layer.zIndex = 0
         this.map_layer.interactive = true
         this.window.addChild(this.map_layer)
-
-        
-
-
- 
         
         this.shape_layer = new Layer()
         this.shape_layer.zIndex = 1
@@ -64,9 +59,14 @@ export abstract class GameScene extends Scene {
         this.window.follow(c)
 
         this.map_layer.on("rightclick", (event) => {
-            
-            const n = new Point(this.window.left + event.x, this.window.top + event.y)
-            c.setNewTarget([n], true)
+            console.log(c.position, this.window.left + event.x, this.window.top + event.y)
+            const path = this.mapx.path_find(c.position._x, c.position._y, this.window.left + event.x, this.window.top + event.y)
+            console.log(path)
+            for(const i in path) {
+                console.log(path[i])
+            }
+            // const n = new Point(this.window.left + event.x, this.window.top + event.y)
+            c.setNewTarget(path, true)
         })
 
     // this.ui_layer = new Layer()

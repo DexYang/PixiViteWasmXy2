@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  '@pixi-essentials/cull':
+    specifier: ^2.0.0
+    version: 2.0.0(@pixi/display@7.2.4)(@pixi/math@7.2.4)
   '@pixi/layers':
     specifier: ^2.0.1
     version: 2.0.1(@pixi/canvas-renderer@7.2.4)(@pixi/core@7.2.4)(@pixi/display@7.2.4)
@@ -19,6 +22,9 @@ dependencies:
   gsap:
     specifier: ^3.11.4
     version: 3.11.4
+  pathfinding:
+    specifier: ^0.4.18
+    version: 0.4.18
   pixi-viewport:
     specifier: ^5.0.1
     version: 5.0.1
@@ -314,6 +320,16 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
     dev: true
+
+  /@pixi-essentials/cull@2.0.0(@pixi/display@7.2.4)(@pixi/math@7.2.4):
+    resolution: {integrity: sha512-6hm1wfCmGItOnyKvCxrmZmOLQVIaN0MqseBweH+tLZH8ecGTIF3qb1cGQDNf9jaK6HH7s/+7m9xXvvk9e92ESw==}
+    peerDependencies:
+      '@pixi/display': ^7.0.0
+      '@pixi/math': ^7.0.0
+    dependencies:
+      '@pixi/display': 7.2.4(@pixi/core@7.2.4)
+      '@pixi/math': 7.2.4
+    dev: false
 
   /@pixi/accessibility@7.2.4(@pixi/core@7.2.4)(@pixi/display@7.2.4)(@pixi/events@7.2.4):
     resolution: {integrity: sha512-EVjuqUqv9FeYFXCv0S0qj1hgCtbAMNBPCbOGEtiMogpM++/IySxBZvcOYg3rRgo9inwt2s4Bi7kUiqMPD8hItw==}
@@ -1317,6 +1333,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /heap@0.2.5:
+    resolution: {integrity: sha512-G7HLD+WKcrOyJP5VQwYZNC3Z6FcQ7YYjEFiFoIj8PfEr73mu421o8B1N5DKUcc8K37EsJ2XXWA8DtrDz/2dReg==}
+    dev: false
+
   /ignore@5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
     engines: {node: '>= 4'}
@@ -1516,6 +1536,12 @@ packages:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
     dev: true
+
+  /pathfinding@0.4.18:
+    resolution: {integrity: sha512-R0TGEQ9GRcFCDvAWlJAWC+KGJ9SLbW4c0nuZRcioVlXVTlw+F5RvXQ8SQgSqI9KXWC1ew95vgmIiyaWTlCe9Ag==}
+    dependencies:
+      heap: 0.2.5
+    dev: false
 
   /picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
