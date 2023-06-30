@@ -3,6 +3,7 @@ import { FancyButton } from "@pixi/ui"
 import Scene from "../core/Scene"
 import { ResourceLoader } from "~/core/ResourceLoader"
 import { centerObject } from "~/utils/misc"
+import { WorkerManager } from "~/lib/WorkerManager"
 
 
 export default class Loading extends Scene {
@@ -55,6 +56,8 @@ export default class Loading extends Scene {
             fontSize: 12,
             fill: "black",
         })
+
+        WorkerManager.getInstance()
 
     
         this.onResize()
