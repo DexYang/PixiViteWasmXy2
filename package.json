@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "tsc": "tsc",
     "preview": "vite preview",
     "lint": "eslint ./src --fix",
     "wasm": "emcc -O2 wasmxy2/entry.cpp -s EXPORTED_FUNCTIONS=\"['_read_map_x', '_read_map_1', '_get_hash', '_read_color_pal', '_read_frame', '_malloc', '_free']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -o ./public/wasmxy2.js "

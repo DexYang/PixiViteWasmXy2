@@ -1,5 +1,4 @@
 import { Layer } from "@pixi/layers"
-import type { SceneUtils } from "./SceneManager"
 import SceneManager from "./SceneManager"
 
 export interface Scene {
@@ -14,7 +13,7 @@ export abstract class Scene extends Layer implements Scene{
 
   sm = SceneManager.getInstance()
 
-  constructor(protected utils: SceneUtils) {
+  constructor() {
       super()
       this.sortableChildren = true
   }

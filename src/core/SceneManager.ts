@@ -2,7 +2,6 @@ import { Application } from "pixi.js"
 import { Layer, Stage } from "@pixi/layers"
 import Scene from "./Scene"
 import { Debug } from "../utils/debug"
-import AssetLoader from "./AssetLoader"
 import { Cursor, getCursor } from "./Cursor"
 import { ResourceLoader } from "./ResourceLoader"
 import { Cull } from "@pixi-essentials/cull"
@@ -11,9 +10,6 @@ if (import.meta.env.DEV) Debug.init()
 
 const cull = new Cull()
 
-export interface SceneUtils {
-  assetLoader: AssetLoader;
-}
 
 export default class SceneManager {
     private static instance: SceneManager
@@ -128,11 +124,9 @@ export default class SceneManager {
     }
 
     private async initScene(sceneName: string) {
-        const sceneUtils = {
-            assetLoader: new AssetLoader(),
-        }
 
-        const scene = new this.sceneConstructors[sceneName](sceneUtils)
+
+        const scene = new this.sceneConstructors[sceneName]()
 
         this.sceneInstances.set(sceneName, scene)
 

@@ -1,4 +1,4 @@
-import { Text, Graphics } from "pixi.js"
+import { Text, Graphics, Assets } from "pixi.js"
 import { FancyButton } from "@pixi/ui"
 import Scene from "../core/Scene"
 import { ResourceLoader } from "~/core/ResourceLoader"
@@ -21,8 +21,10 @@ export default class Loading extends Scene {
     }
 
     async load() {
-        await this.utils.assetLoader.loadAssetsGroup("Loading")
-    
+
+        await Assets.load("/Loading/images/button-normal.png")
+        await Assets.load("/Loading/images/button-pressed.png")
+
         // graphics
         this.graphics = new Graphics()
 
@@ -36,8 +38,8 @@ export default class Loading extends Scene {
 
         // button
         this.button = new FancyButton({
-            defaultView: "button-normal",
-            pressedView: "button-pressed",
+            defaultView: "/Loading/images/button-normal.png",
+            pressedView: "/Loading/images/button-pressed.png",
         })
         this.button.anchor.set(0.5)
         this.button.onPress.connect(async () => await this.chooseLocalResources())
