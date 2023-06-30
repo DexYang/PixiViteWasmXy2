@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-importScripts("/wasmxy2.js")
+importScripts("wasmxy2.js")
 
 onmessage = function (event) {
     const method = event.data.method
