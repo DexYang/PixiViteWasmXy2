@@ -39,8 +39,6 @@ export default class SceneManager {
 
         document.oncontextmenu  = document.body.oncontextmenu = function(event) {
             event.preventDefault()
-            
-            // console.log(event)
         }
 
         this.app.renderer.on("prerender", () => {
@@ -140,16 +138,9 @@ export default class SceneManager {
             Debug.log("直读资源未加载")
         } else {
             this.cursor_layer.removeChild(this.cursor)
-            // getCursor().then(cursor => {
-            //     this.cursor = cursor
-            //     this.cursor.zIndex = 999
-            //     this.cursor_layer.addChild(this.cursor)
-            //     Debug.log("鼠标已加载", this.cursor)
-            // })
             this.cursor = await getCursor()
             this.cursor.zIndex = 999
             this.cursor_layer.addChild(this.cursor)
-            Debug.log("鼠标已加载", this.cursor)
         }
         return true
     }

@@ -1,5 +1,4 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
-import { Debug } from "../utils/debug"
 import { Texture, FORMATS, Point } from "pixi.js"
 import { WorkerManager } from "./WorkerManager"
 import PF from "pathfinding"
@@ -31,6 +30,9 @@ class Mask {
     width: number
     height: number
     size: number
+    texture: Texture | null
+    requested = false
+    loaded = false
 
     constructor() {
         this.offset = 0
@@ -72,6 +74,7 @@ export class MapX {
 
     blocks: Array<Block>
     masks: Array<Mask>
+    no_repeat: object
     jpeg_head: ArrayBuffer
   
     constructor(path: string) {
@@ -85,6 +88,7 @@ export class MapX {
         this.blocks = []
         this.masks = []
         this.cell = []
+        this.no_repeat = {}
     }
 
     destroy() {
@@ -101,7 +105,21 @@ export class MapX {
 
     receive(event) {
         if (event.data.id && this.id === event.data.id) {
-            this.blocks[event.data.blockIndex].texture = Texture.fromBuffer(event.data.data, 320, 240, { format: FORMATS.RGB})
+            if (event.data.method === "jpeg") {
+                this.blocks[event.data.blockIndex].texture = Texture.fromBuffer(
+                    event.data.data, 
+                    320, 
+                    240, 
+                    { format: FORMATS.RGB}
+                )
+            } else if (event.data.method === "mask") {
+                this.masks[event.data.maskIndex].texture = Texture.fromBuffer(
+                    event.data.data, 
+                    this.masks[event.data.maskIndex].width, 
+                    this.masks[event.data.maskIndex].height, 
+                    { format: FORMATS.RGBA }
+                )
+            }
         }
     }
 
@@ -114,7 +132,7 @@ export class MapX {
             this.flag = this.readBufToStr(0, 4)
       
             if (this.flag !== "XPAM" && this.flag !== "0.1M") {
-                Debug.warn("Incorrect Map Format: " + this.path)
+                console.error("Incorrect Map Format: " + this.path)
                 return
             }
             this.width = this.readBufToU32(4)
@@ -144,7 +162,7 @@ export class MapX {
             let offset = 12 + this.block_num * 4 + 4  // 最后加4是  跳过无用的4字节 旧地图为MapSize  新地图为MASK Flag
 
             if (this.flag === "0.1M") {
-                Debug.log("Load M1.0 " + this.path)
+                console.log("Load M1.0 " + this.path)
                 const mask_num = this.readBufToU32(offset)
                 offset += 4
                 for (let i = 0; i < mask_num; i++) {
@@ -155,6 +173,7 @@ export class MapX {
                     mask.width = this.readBufToU32(mask.offset + 8)
                     mask.height = this.readBufToU32(mask.offset + 12)
                     mask.size = this.readBufToU32(mask.offset + 16)
+                    mask.offset += 20
                     const mask_row_start = Math.max(Math.ceil(mask.y / this.block_height), 0)
                     const mask_row_end = Math.min(Math.ceil((mask.y + mask.height) / this.block_height), this.row_num - 1)
                     const mask_col_start = Math.max(Math.ceil(mask.x / this.block_width), 0)
@@ -170,7 +189,7 @@ export class MapX {
                 }
                 offset += mask_num * 4
             } else if (this.flag === "XPAM") {
-                Debug.log("Load XPAM " + this.path)
+                console.log("Load XPAM " + this.path)
                 const flag = this.readBufToStr(offset, offset + 4)
                 const size = this.readBufToU32(offset + 4)
                 offset += 8
@@ -202,7 +221,7 @@ export class MapX {
                     block.jpegSize = size
                     offset += size
                 } else if (flag === "KSAM" || flag === "2SAM") {
-                    // this.read_old_mask(offset, size, i)
+                    this.read_old_mask(offset, size, i)
                     offset += size
                 } else if (flag === "LLEC") {
                     this.read_cell(offset, size, i)
@@ -213,6 +232,33 @@ export class MapX {
                     loop = false
                 }
             }
+        }
+    }
+
+    read_old_mask(offset: number, size: number, blockIndex: number) {
+        const mask = new Mask()
+        const row = Math.floor(blockIndex / this.col_num)
+        const col = Math.floor(blockIndex % this.col_num)
+
+        mask.offset = offset + 16
+        mask.x = this.readBufTo32(offset + 0)
+        mask.x = (col * 320) + mask.x
+        mask.y = this.readBufTo32(offset + 4)
+        mask.y = (row * 240) + mask.y
+
+        mask.width = this.readBufToU32(offset + 8)
+        mask.height = this.readBufToU32(offset + 12)
+        mask.size = size - 16
+
+        const key = mask.x * 10000 + mask.y
+        if (key in this.no_repeat) {
+            const id = Object.keys(this.no_repeat).length
+            this.no_repeat[key] = id
+            this.blocks[blockIndex].ownMasks.push(id)
+            this.masks[id] = mask
+        } else {
+            const id = this.no_repeat[key]
+            this.blocks[blockIndex].ownMasks.push(id)
         }
     }
 
@@ -388,12 +434,61 @@ export class MapX {
         return ret
     }
 
+    getMask(i) {
+        if (i >= this.masks.length) return
+        if (this.masks[i].requested) return
+
+        const offset = this.masks[i].offset
+        const size = this.masks[i].size
+
+        let uint8Array
+        uint8Array = new Uint8Array(this.buf.slice(offset, offset + size))
+
+        this.wm?.post({
+            method: "getMask",
+            data: uint8Array,
+            maskIndex: i,
+            w: this.masks[i].width,
+            h: this.masks[i].height,
+            id: this.id
+        })
+        
+        // const inBuffer = Module._malloc(size)
+        // Module.HEAPU8.set(uint8Array, inBuffer)
+        // const outSize = this.masks[i].width * this.masks[i].height
+        // const outBuffer = Module._malloc(outSize)
+
+        // Module.ccall("read_mask", 
+        //     null,
+        //     [Number, Number, Number, Number],
+        //     [inBuffer, outBuffer, this.masks[i].width, this.masks[i].height])
+
+        // const ret = Module.HEAPU8.slice(outBuffer, outBuffer + outSize)
+
+        // Module._free(inBuffer)
+        // Module._free(outBuffer)
+
+        // this.masks[i].texture = Texture.fromBuffer(
+        //     ret, 
+        //     this.masks[i].width, 
+        //     this.masks[i].height, 
+        //     { format: FORMATS.ALPHA }
+        // )
+
+        uint8Array = null
+        this.masks[i].requested = true
+    }
+
     readBufToStr(start: number, end: number): string {
         return decoder.decode(this.buf.slice(start, end))
     }
 
     readBufToU32(offset: number): number {
         return new Uint32Array(this.buf.slice(offset, offset + 4))[0]
+    }
+
+    readBufTo32(offset: number): number {
+        return new Int32Array(this.buf.slice(offset, offset + 4))[0]
     }
 
     readBufToU16(offset: number): number {
@@ -406,11 +501,8 @@ export class MapX {
     }
 
     async readU32(file: File, offset: number): Promise<number> {
-    // const start1 = performance.now()
         const buf = await file.slice(offset, offset + 4).arrayBuffer()
         const number = new Uint32Array(buf)[0]
-        // const end1 = performance.now()
-        // console.log("readU32 cost is", `${end1 - start1}ms`)
         return number
     }
 

@@ -122,6 +122,8 @@ export class Character extends Container {
         const speed = this.is_running ? config.run_speed : config.walk_speed
         this.position.x += vec.x * speed
         this.position.y += vec.y * speed
+        this.zOrder = this.position.y
+        this.zIndex = this.position.y
     }
 }
 
