@@ -12,7 +12,9 @@ class Block {
     jpegOffset: number
     jpegSize: number
     texture: Texture | null
+    RGB: Uint8Array
     requested = false
+    decoded = false
     loaded = false
 
     constructor() {
@@ -106,6 +108,8 @@ export class MapX {
     receive(event) {
         if (event.data.id && this.id === event.data.id) {
             if (event.data.method === "jpeg") {
+                this.blocks[event.data.blockIndex].decoded = true
+                this.blocks[event.data.blockIndex].RGB = event.data.data
                 this.blocks[event.data.blockIndex].texture = Texture.fromBuffer(
                     event.data.data, 
                     320, 
@@ -438,18 +442,42 @@ export class MapX {
         if (i >= this.masks.length) return
         if (this.masks[i].requested) return
 
-        const offset = this.masks[i].offset
-        const size = this.masks[i].size
+        const mask = this.masks[i]
+
+        const offset = mask.offset
+        const size = mask.size
+
+        const start_col = Math.floor(mask.x / 320)
+        const end_col = Math.floor((mask.x + mask.width) / 320)
+        const start_row = Math.floor(mask.y / 240)
+        const end_row = Math.floor((mask.y + mask.height) / 240)
+
+        const cross_blocks: Array<number> = []
+        for (let row = start_row; row <= end_row; row++) {
+            for (let col = start_col; col <= end_col; col++) {
+                cross_blocks.push(row * this.col_num + col)
+            }
+        }
+        const cross_rgb = new Uint8Array(cross_blocks.length * 230400)
+        for (let i = 0; i < cross_blocks.length; i++) {
+            if (!this.blocks[cross_blocks[i]].decoded) return
+            cross_rgb.set(this.blocks[cross_blocks[i]].RGB, i * 230400)
+        }
 
         let uint8Array
         uint8Array = new Uint8Array(this.buf.slice(offset, offset + size))
 
         this.wm?.post({
             method: "getMask",
+
             data: uint8Array,
+            rgb: cross_rgb,
+            w: mask.width,
+            h: mask.height,
+            x: mask.x - start_col * 320,
+            y: mask.y - start_row * 240,
+
             maskIndex: i,
-            w: this.masks[i].width,
-            h: this.masks[i].height,
             id: this.id
         })
         

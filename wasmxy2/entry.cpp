@@ -18,8 +18,8 @@ bool EMSCRIPTEN_KEEPALIVE read_map_1(uint8_t* in, uint32_t inSize, uint8_t* out)
     return decode_map_jpeg(out, repairedSize, out, false);
 }
 
-void EMSCRIPTEN_KEEPALIVE read_mask(uint8_t* in, uint8_t* out, uint32_t width, uint32_t height) {
-    decode_mask(in, out, width, height);
+void EMSCRIPTEN_KEEPALIVE read_mask(uint8_t* in, uint8_t* out, uint8_t* rgb, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+    decode_mask(in, out, rgb, x, y, width, height);
 }
 
 void EMSCRIPTEN_KEEPALIVE get_hash(char* p, uint32_t* out) {

@@ -4,8 +4,8 @@ import { Viewport } from "pixi-viewport"
 import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { getMapX, MapX } from "~/lib/MapX"
-import { BLEND_MODES, Sprite } from "pixi.js"
-import { get_character } from "./Character"
+import { Graphics, Sprite } from "pixi.js"
+import { Character, get_character } from "./Character"
 
 
 export abstract class GameScene extends Scene {
@@ -50,6 +50,14 @@ export abstract class GameScene extends Scene {
         this.shape_layer = new Layer()
         this.shape_layer.zIndex = 1
         this.shape_layer.sortableChildren = true
+        this.shape_layer.group.enableSort = true
+        
+        // this.shape_layer.group.on("sort", (item) => {
+        //     if (item instanceof Character) {
+        //         console.log(item)
+        //     }
+            
+        // })
         this.window.addChild(this.shape_layer)
 
         
@@ -89,6 +97,11 @@ export abstract class GameScene extends Scene {
                 } else if (block.loaded) {
                     continue
                 } else if (block.texture) {
+                    // const graphics = new Graphics()
+                    // graphics.beginFill(0xFFFFFF)
+                    // graphics.drawRect(j * 320, i * 240, 320, 240)
+                    // graphics.endFill()
+                    // this.map_layer.addChild(graphics)
                     const block_sprite = new Sprite(block.texture)
                     block_sprite.position.x = j * 320
                     block_sprite.position.y = i * 240
@@ -112,10 +125,7 @@ export abstract class GameScene extends Scene {
                         mask_sprite.position.y = mask.y
                         mask_sprite.zOrder = mask.y + mask.height
                         mask_sprite.zIndex = mask.y + mask.height
-                        mask_sprite.blendMode = BLEND_MODES.MULTIPLY
-                        
                         mask_sprite.eventMode = "none"
-                        
                         this.shape_layer.addChild(mask_sprite)
                         mask.texture = null
                         mask.loaded = true

@@ -10,7 +10,7 @@ onmessage = function (event) {
         const data = decodeJpeg(event.data.data, "read_map_1")
         this.postMessage({ data: data, method: "jpeg", id: event.data.id, blockIndex: event.data.blockIndex})
     } else if (method === "getMask") {
-        const data = decodeMask(event.data.data, event.data.w, event.data.h)
+        const data = decodeMask(event.data)
         this.postMessage({ data: data, method: "mask", id: event.data.id, maskIndex: event.data.maskIndex})
     }
 }
@@ -33,20 +33,25 @@ function decodeJpeg(data, method) {
     return ret
 }
 
-function decodeMask(data, w, h) {
+function decodeMask({data, w, h, x, y, rgb}) {
+    const rgbBuffer = Module._malloc(rgb.length)
+    Module.HEAPU8.set(rgb, rgbBuffer)
+
     const inBuffer = Module._malloc(data.byteLength)
     Module.HEAPU8.set(data, inBuffer)
+
     const outSize = Math.floor(w * h * 4)
     const outBuffer = Module._malloc(outSize)
     
     Module.ccall("read_mask", 
         null,
-        [Number, Number, Number, Number],
-        [inBuffer, outBuffer, w, h])
+        [Number, Number, Number, Number, Number, Number, Number],
+        [inBuffer, outBuffer, rgbBuffer, x, y, w, h])
 
     ret = Module.HEAPU8.slice(outBuffer, outBuffer + outSize)
 
     Module._free(inBuffer)
     Module._free(outBuffer)
+    Module._free(rgbBuffer)
     return ret
 }

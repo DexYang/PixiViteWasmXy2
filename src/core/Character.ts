@@ -51,7 +51,6 @@ export class Character extends Container {
             if (this.target_list.length > 0) {
                 if (this.isOnTarget()) {
                     const temp = this.target_list.shift()
-                    console.log(temp)
                     if (temp) this.target = temp
                 }
                 this.calcDirection(this.target.x, this.target.y)

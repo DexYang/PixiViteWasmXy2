@@ -291,22 +291,31 @@ eof_found:
 }
 
 
-void decode_mask(uint8_t* in, uint8_t* out, uint32_t width, uint32_t height) {
+void decode_mask(uint8_t* in, uint8_t* out, uint8_t* rgb, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
 	uint32_t align_width = (width + 3) / 4;	// align 4 bytes
 	uint32_t size = align_width * height;
 	uint8_t* p = (uint8_t*) malloc(size * 2);
 	uint32_t size_temp = decompress_mask((uint8_t*)in, (uint8_t*)p);
 	uint32_t compressedMaskPos = 0;
+	uint32_t cross_col_num = (width / 320) + width % 320 == 0 ? 0 : 1;
+
 	
 	for (uint32_t i = 0; i < height; i++) {
 		uint32_t count4 = 0;
 		for (uint32_t j = 0; j < width; j++) {
+			int block_row = (i + y) / 240;
+			int block_col = (j + x) / 320;
+			int block_num = block_row * cross_col_num + block_col;
+			int block_in_y = (i + y) - block_row * 240;
+			int block_in_x = (j + x) - block_col * 320;
+			int block_pos = 230400 * block_num + (block_in_y * 320 + block_in_x) * 3;
+
 			uint32_t realPos = i * width + j;
 			uint8_t byte = (p[compressedMaskPos] >> count4 * 2) & 3;
-			out[realPos * 4 + 0] = 1;
-			out[realPos * 4 + 1] = 1;
-			out[realPos * 4 + 2] = 1;
-			out[realPos * 4 + 3] = byte == 3 ? 128 : byte;
+			out[realPos * 4 + 0] = rgb[block_pos + 0];
+			out[realPos * 4 + 1] = rgb[block_pos + 1];
+			out[realPos * 4 + 2] = rgb[block_pos + 2];
+			out[realPos * 4 + 3] = byte == 3 ? 150 : byte;
 			count4++;
 			if (count4 >= 4) {
 				count4 = 0;
