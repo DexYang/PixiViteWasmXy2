@@ -4,7 +4,7 @@ import { Viewport } from "pixi-viewport"
 import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { getMapX, MapX } from "~/lib/MapX"
-import { Graphics, Sprite } from "pixi.js"
+import { Graphics, Sprite, Text } from "pixi.js"
 import { Character, get_character } from "./Character"
 
 
@@ -52,12 +52,20 @@ export abstract class GameScene extends Scene {
         this.shape_layer.sortableChildren = true
         this.shape_layer.group.enableSort = true
         
-        // this.shape_layer.group.on("sort", (item) => {
-        //     if (item instanceof Character) {
-        //         console.log(item)
-        //     }
-            
-        // })
+        this.shape_layer.group.on("sort", (item) => {
+            if (item instanceof Character) {
+                item.zIndex = item.y
+                const block_index = Math.floor(item.y / 240) * this.mapx.col_num + Math.floor(item.x / 320)
+                const ownMasks = this.mapx.blocks[block_index].ownMasks
+                for (let i = 0; i < ownMasks.length; i++) {
+                    const mask = this.mapx.masks[ownMasks[i]]
+                    if (mask.calc_sort_z(item.x, item.y)) {
+                        item.zIndex = Math.max(item.zIndex, mask.z + 1)
+                        // item.zOrder = item.zIndex
+                    }
+                }
+            } 
+        })
         this.window.addChild(this.shape_layer)
 
         
@@ -87,27 +95,38 @@ export abstract class GameScene extends Scene {
     }
 
     updateWindow() {
-        const  { start_col, end_col, start_row, end_row } = this.getWindow(500, 500)
+        const  { start_col, end_col, start_row, end_row } = this.getWindow()
         for (let i = start_row; i <= end_row; i++) {
             for (let j = start_col; j <= end_col; j++) {
                 const block_index = i * this.mapx.col_num + j
                 const block = this.mapx.blocks[block_index]
                 if (!block.requested) {
                     this.mapx.getJpeg(block_index)
-                } else if (block.loaded) {
-                    continue
                 } else if (block.texture) {
-                    // const graphics = new Graphics()
-                    // graphics.beginFill(0xFFFFFF)
-                    // graphics.drawRect(j * 320, i * 240, 320, 240)
-                    // graphics.endFill()
-                    // this.map_layer.addChild(graphics)
-                    const block_sprite = new Sprite(block.texture)
-                    block_sprite.position.x = j * 320
-                    block_sprite.position.y = i * 240
-                    block_sprite.zOrder = 0
-                    block_sprite.zIndex = 0
-                    this.map_layer.addChild(block_sprite)
+                    const graphics = new Graphics()
+                    graphics.lineStyle(10, 0x00FF00, 1)
+                    graphics.beginFill(0xFFFFFF)
+                    graphics.drawRect(j * 320, i * 240, 320, 240)
+                    graphics.endFill()
+                    this.map_layer.addChild(graphics)
+
+                    const basicText = new Text(`${j * 320}, ${i * 240}`)
+                    basicText.x = j * 320
+                    basicText.y = i * 240
+                    
+                    const basicText1 = new Text(`${block_index}\n`+block.ownMasks.join(","), {
+                        fill: 0xff1010
+                    })
+                    basicText1.x = j * 320 + 100
+                    basicText1.y = i * 240 + 100
+                    this.map_layer.addChild(basicText1)
+
+                    // const block_sprite = new Sprite(block.texture)
+                    // block_sprite.position.x = j * 320
+                    // block_sprite.position.y = i * 240
+                    // block_sprite.zOrder = 0
+                    // block_sprite.zIndex = 0
+                    // this.map_layer.addChild(block_sprite)
                     block.texture = null
                     block.loaded = true
                 }
@@ -117,15 +136,25 @@ export abstract class GameScene extends Scene {
                     const mask = this.mapx.masks[maskIndex]
                     if (!mask.requested) {
                         this.mapx.getMask(maskIndex)
-                    } else if (mask.loaded) {
-                        continue
                     } else if (mask.texture) {
                         const mask_sprite = new Sprite(mask.texture)
                         mask_sprite.position.x = mask.x
                         mask_sprite.position.y = mask.y
-                        mask_sprite.zOrder = mask.y + mask.height
-                        mask_sprite.zIndex = mask.y + mask.height
+                        const graphics = new Graphics()
+
+                        graphics.lineStyle(2, 0xFFBD01, 1)
+                        graphics.drawRect(mask.x, mask.y, mask.width, mask.height)
+                        graphics.endFill()
+
+                        const basicText = new Text(`${maskIndex}`)
+                        basicText.x = mask.x
+                        basicText.y = mask.y
+                        // mask_sprite.zOrder = mask.z
+                        mask_sprite.zIndex = mask.z
                         mask_sprite.eventMode = "none"
+                        graphics.eventMode = "none"
+                        this.shape_layer.addChild(graphics)
+                        this.shape_layer.addChild(basicText)
                         this.shape_layer.addChild(mask_sprite)
                         mask.texture = null
                         mask.loaded = true
@@ -135,7 +164,9 @@ export abstract class GameScene extends Scene {
         }
     }
 
-    getWindow(x: number, y: number) {
+    getWindow() {
+        const x = this.window.position.x
+        const y = this.window.position.y
         const innerWidth = window.innerWidth
         const innerHeight = window.innerHeight
 

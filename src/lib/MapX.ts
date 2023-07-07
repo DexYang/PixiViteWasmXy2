@@ -29,12 +29,15 @@ class Mask {
     offset: number
     x: number
     y: number
+    z: number
     width: number
     height: number
     size: number
     texture: Texture | null
     requested = false
     loaded = false
+    sort_table: Array<number>
+    sample_gap = 10
 
     constructor() {
         this.offset = 0
@@ -43,6 +46,27 @@ class Mask {
         this.width = 0
         this.height = 0
         this.size = 0
+        this.sort_table = []
+    }
+
+    calc_sort_z(x: number, y: number) {
+        if (this.sort_table.length <= 0) 
+            return false
+        console.log(this.x, this.y, this.sort_table)
+        if (y > this.y && y < this.z) {
+            if (x > this.x - 20 && x < this.x + this.width + 20) {
+                const rx = x - this.x
+                const ry = y - this.y
+                if (rx >= 0 && rx < this.width) {
+                    return ry > this.sort_table[Math.floor(rx / 10)]
+                } else if (rx < 0) {
+                    return ry > this.sort_table[0]
+                } else {
+                    return ry > this.sort_table[this.sort_table.length - 1]
+                }
+            }
+        }
+        return false
     }
 }
 
@@ -117,12 +141,31 @@ export class MapX {
                     { format: FORMATS.RGB}
                 )
             } else if (event.data.method === "mask") {
-                this.masks[event.data.maskIndex].texture = Texture.fromBuffer(
+                const mask = this.masks[event.data.maskIndex]
+                mask.texture = Texture.fromBuffer(
                     event.data.data, 
-                    this.masks[event.data.maskIndex].width, 
-                    this.masks[event.data.maskIndex].height, 
+                    mask.width, 
+                    mask.height, 
                     { format: FORMATS.RGBA }
                 )
+                const calc_sort_point = (x: number) => {
+                    let top = 0
+                    let bottom = mask.height - 1
+                    let mid = Math.floor((top + bottom) / 2)
+                    while (bottom - top > 1) {
+                        mid = Math.floor((top + bottom) / 2)
+                        const pos = (mask.width * mid + x) * 4 + 3
+                        if (event.data.data[pos] === 1) {
+                            bottom = mid
+                        } else {
+                            top = mid
+                        }
+                    }
+                    return mid + 1
+                }
+                for (let x = 0; x <= mask.width; x += mask.sample_gap) {
+                    mask.sort_table.push(calc_sort_point(x))
+                }
             }
         }
     }
@@ -176,6 +219,7 @@ export class MapX {
                     mask.y = this.readBufToU32(mask.offset + 4)
                     mask.width = this.readBufToU32(mask.offset + 8)
                     mask.height = this.readBufToU32(mask.offset + 12)
+                    mask.z = mask.y + mask.height
                     mask.size = this.readBufToU32(mask.offset + 16)
                     mask.offset += 20
                     const mask_row_start = Math.max(Math.ceil(mask.y / this.block_height), 0)
@@ -252,6 +296,7 @@ export class MapX {
 
         mask.width = this.readBufToU32(offset + 8)
         mask.height = this.readBufToU32(offset + 12)
+        mask.z = mask.y + mask.height
         mask.size = size - 16
 
         const key = mask.x * 10000 + mask.y
