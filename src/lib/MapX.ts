@@ -222,13 +222,20 @@ export class MapX {
                     mask.z = mask.y + mask.height
                     mask.size = this.readBufToU32(mask.offset + 16)
                     mask.offset += 20
-                    const mask_row_start = Math.max(Math.ceil(mask.y / this.block_height), 0)
-                    const mask_row_end = Math.min(Math.ceil((mask.y + mask.height) / this.block_height), this.row_num - 1)
-                    const mask_col_start = Math.max(Math.ceil(mask.x / this.block_width), 0)
-                    const mask_col_end = Math.min(Math.ceil((mask.x + mask.width) / this.block_width), this.col_num - 1)
-                    for (let x = mask_row_start; x <= mask_row_end; x++) {
-                        for (let y = mask_col_start; y <= mask_col_end; y++) {
-                            const index = x * this.col_num + y
+                    if (i === 1044) {
+                        console.log()
+                    }
+                    const mask_row_start = Math.max(Math.floor(mask.y / this.block_height), 0)
+                    const mask_row_end = Math.min(Math.floor((mask.y + mask.height) / this.block_height), this.row_num - 1)
+                    const mask_col_start = Math.max(Math.floor(mask.x / this.block_width), 0)
+                    const mask_col_end = Math.min(Math.floor((mask.x + mask.width) / this.block_width), this.col_num - 1)
+                    for (let row = mask_row_start; row <= mask_row_end; row++) {
+                        for (let col = mask_col_start; col <= mask_col_end; col++) {
+                            const index = row * this.col_num + col
+                            if (i === 1044) {
+                                console.log(index, i, this.blocks[index])
+                                console.log(mask)
+                            }
                             if (index >= 0 && index < this.block_num)
                                 this.blocks[index].ownMasks.push(i)
                         }

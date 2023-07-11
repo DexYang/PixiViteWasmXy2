@@ -54,9 +54,14 @@ export abstract class GameScene extends Scene {
         
         this.shape_layer.group.on("sort", (item) => {
             if (item instanceof Character) {
+                const text = item.getChildByName("test") as Text
+                
                 item.zIndex = item.y
                 const block_index = Math.floor(item.y / 240) * this.mapx.col_num + Math.floor(item.x / 320)
                 const ownMasks = this.mapx.blocks[block_index].ownMasks
+                if (text) 
+                    text.text = `${block_index}\n`+ownMasks.join(",")
+                
                 for (let i = 0; i < ownMasks.length; i++) {
                     const mask = this.mapx.masks[ownMasks[i]]
                     if (mask.calc_sort_z(item.x, item.y)) {
@@ -71,6 +76,11 @@ export abstract class GameScene extends Scene {
         
         const c = await get_character(1)
         c.position.set(500, 500)
+        const basicText = new Text("???")
+        basicText.name = "test"
+        basicText.x = 0
+        basicText.y = 0
+        c.addChild(basicText)
         
         this.shape_layer.addChild(c)
 
