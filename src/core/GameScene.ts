@@ -14,6 +14,8 @@ export abstract class GameScene extends Scene {
     ui_layer: Layer
     window_layer: Layer
 
+    player: Character
+
     mapx: MapX
 
     window: Viewport
@@ -54,34 +56,36 @@ export abstract class GameScene extends Scene {
         
         this.shape_layer.group.on("sort", (item) => {
             if (item instanceof Character) {
-                const text = item.getChildByName("test") as Text
+                // const text = item.getChildByName("test") as Text
                 
                 item.zIndex = item.y
                 const block_index = Math.floor(item.y / 240) * this.mapx.col_num + Math.floor(item.x / 320)
                 const ownMasks = this.mapx.blocks[block_index].ownMasks
-                if (text) 
-                    text.text = `${block_index}\n`+ownMasks.join(",")
+                // if (text) 
+                //     text.text = `${block_index}\n`+ownMasks.join(",")
                 
                 for (let i = 0; i < ownMasks.length; i++) {
                     const mask = this.mapx.masks[ownMasks[i]]
                     if (mask.calc_sort_z(item.x, item.y)) {
                         item.zIndex = Math.max(item.zIndex, mask.z + 1)
-                        // item.zOrder = item.zIndex
+                        item.zOrder = item.zIndex
                     }
                 }
-            } 
+            }else {
+                item.zIndex = item.y
+            }
         })
         this.window.addChild(this.shape_layer)
 
         
         const c = await get_character(1)
         c.position.set(500, 500)
-        const basicText = new Text("???")
-        basicText.name = "test"
-        basicText.x = 0
-        basicText.y = 0
-        c.addChild(basicText)
-        
+        // const basicText = new Text("???")
+        // basicText.name = "test"
+        // basicText.x = 0
+        // basicText.y = 0
+        // c.addChild(basicText)
+        this.player = c
         this.shape_layer.addChild(c)
 
         this.window.follow(c)
@@ -96,7 +100,6 @@ export abstract class GameScene extends Scene {
     }
 
     async start() {
-        const player_position = {x: 500, y: 500}
 
         this.updateWindow()
         this.sm.app.ticker.add(() => {
@@ -154,12 +157,16 @@ export abstract class GameScene extends Scene {
 
                         graphics.lineStyle(2, 0xFFBD01, 1)
                         graphics.drawRect(mask.x, mask.y, mask.width, mask.height)
+                        for (let ii = 0; ii < mask.sort_table.length; ii++) {
+                            graphics.drawCircle(mask.x + ii * mask.sample_gap, mask.y + mask.sort_table[ii], 2)
+                        }
+                        
                         graphics.endFill()
 
                         const basicText = new Text(`${maskIndex}`)
                         basicText.x = mask.x
                         basicText.y = mask.y
-                        // mask_sprite.zOrder = mask.z
+                        mask_sprite.zOrder = mask.z
                         mask_sprite.zIndex = mask.z
                         mask_sprite.eventMode = "none"
                         graphics.eventMode = "none"
@@ -175,8 +182,8 @@ export abstract class GameScene extends Scene {
     }
 
     getWindow() {
-        const x = this.window.position.x
-        const y = this.window.position.y
+        const x = this.player.position.x
+        const y = this.player.position.y
         const innerWidth = window.innerWidth
         const innerHeight = window.innerHeight
 

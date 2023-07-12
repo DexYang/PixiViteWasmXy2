@@ -52,7 +52,7 @@ class Mask {
     calc_sort_z(x: number, y: number) {
         if (this.sort_table.length <= 0) 
             return false
-        console.log(this.x, this.y, this.sort_table)
+        // console.log(this.x, this.y, this.sort_table)
         if (y > this.y && y < this.z) {
             if (x > this.x - 20 && x < this.x + this.width + 20) {
                 const rx = x - this.x
@@ -95,7 +95,7 @@ export class MapX {
     cell: Array<Array<number>>
     grid: PF.Grid
     astar = new PF.AStarFinder({
-        diagonalMovement: PF.DiagonalMovement.Always
+        diagonalMovement: PF.DiagonalMovement.Never
     })
 
     blocks: Array<Block>
@@ -222,9 +222,6 @@ export class MapX {
                     mask.z = mask.y + mask.height
                     mask.size = this.readBufToU32(mask.offset + 16)
                     mask.offset += 20
-                    if (i === 1044) {
-                        console.log()
-                    }
                     const mask_row_start = Math.max(Math.floor(mask.y / this.block_height), 0)
                     const mask_row_end = Math.min(Math.floor((mask.y + mask.height) / this.block_height), this.row_num - 1)
                     const mask_col_start = Math.max(Math.floor(mask.x / this.block_width), 0)
@@ -232,10 +229,6 @@ export class MapX {
                     for (let row = mask_row_start; row <= mask_row_end; row++) {
                         for (let col = mask_col_start; col <= mask_col_end; col++) {
                             const index = row * this.col_num + col
-                            if (i === 1044) {
-                                console.log(index, i, this.blocks[index])
-                                console.log(mask)
-                            }
                             if (index >= 0 && index < this.block_num)
                                 this.blocks[index].ownMasks.push(i)
                         }
@@ -344,7 +337,7 @@ export class MapX {
         const target = this.get_nearest_valid_point(_x2, _y2)
         const path = this.astar.findPath(Math.floor(x1 / 20), Math.floor(y1 / 20), target[0], target[1], this.grid.clone())
         const newPath = this.smoothenPath(this.grid, path)
-        const worldPath = newPath.map(item => new Point(item[0] * 20, item[1] * 20))
+        const worldPath = newPath.map(item => new Point(Math.floor(item[0] * 20), Math.floor(item[1] * 20)))
         if (worldPath.length > 0) {
             worldPath[0].x = x1
             worldPath[0].y = y1
@@ -508,11 +501,11 @@ export class MapX {
         for (let row = start_row; row <= end_row; row++) {
             for (let col = start_col; col <= end_col; col++) {
                 cross_blocks.push(row * this.col_num + col)
+                if (!this.blocks[row * this.col_num + col].decoded) return
             }
         }
         const cross_rgb = new Uint8Array(cross_blocks.length * 230400)
         for (let i = 0; i < cross_blocks.length; i++) {
-            if (!this.blocks[cross_blocks[i]].decoded) return
             cross_rgb.set(this.blocks[cross_blocks[i]].RGB, i * 230400)
         }
 

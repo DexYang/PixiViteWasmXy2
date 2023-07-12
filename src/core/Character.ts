@@ -95,6 +95,7 @@ export class Character extends Container {
     }
 
     calcDirection(x:number, y:number) {
+        if (this.position.x === x && this.position.y === y) return
         const d = calcDirection8(this.position.x, this.position.y, x, y)
         if (this.direction !== d) {
             this.changeDirection(d)
@@ -119,8 +120,8 @@ export class Character extends Container {
         const vec = this.target.subtract(this.position).normalize()
         if (isNaN(vec.x)  || isNaN(vec.y)) return
         const speed = this.is_running ? config.run_speed : config.walk_speed
-        this.position.x += vec.x * speed
-        this.position.y += vec.y * speed
+        this.position.x = Math.floor(this.position.x + vec.x * speed + 0.5)
+        this.position.y = Math.floor(this.position.y + vec.y * speed + 0.5)
         this.zOrder = this.position.y
         this.zIndex = this.position.y
     }
