@@ -1,10 +1,11 @@
 import Scene from "./Scene"
 import { Layer } from "@pixi/layers"
-import { AnimatedSprite, Container, Graphics, Sprite } from "pixi.js"
+import { AnimatedSprite, Container, Sprite } from "pixi.js"
 import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { WDFManager } from "~/lib/WDFManager"
 import config from "~/config"
+import { FancyButton } from "@pixi/ui"
 
 
 export abstract class LoginScene extends Scene {
@@ -36,6 +37,8 @@ export abstract class LoginScene extends Scene {
         const res = this.conf[config.ui_prefer]
 
         this.bg_layer = new Layer()
+        this.bg_layer.zIndex = 0
+        this.bg_layer.zOrder = 0
         this.bg_layer.sortableChildren = true
 
         for (const key in res["static"]) {
@@ -65,5 +68,33 @@ export abstract class LoginScene extends Scene {
         }
 
         this.container.addChild(this.bg_layer)
+
+
+        this.ui_layer = new Layer()
+        this.ui_layer.zIndex = 0
+        this.ui_layer.zOrder = 0
+
+        for (const key in res["buttons"]) {
+            const value = res["buttons"][key]
+            const was = await wdfManager.get(value["wdf"], value["was_hash"])
+            if (was !== undefined) {
+                const btn = new FancyButton({
+                    defaultView: new Sprite(was.readFrames()[0][0].texture),
+                    pressedView: new Sprite(was.readFrames()[0][1].texture),
+                    hoverView: new Sprite(was.readFrames()[0][2].texture),
+                })
+                btn.position.set(value["x"], value["y"])
+                if (key === "进入游戏") {
+                    btn.onPress.connect(async () => await this.sm.switchScene("World"))
+                } else if (key === "注册账号") {
+                    btn.onPress.connect(() => alert("注册账号"))
+                } else if (key === "退出游戏") {
+                    btn.onPress.connect(async () => await this.sm.switchScene("Loading"))
+                }
+                this.ui_layer.addChild(btn)
+            }
+        }
+
+        this.container.addChild(this.ui_layer)
     }
 }

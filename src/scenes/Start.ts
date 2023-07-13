@@ -3,7 +3,7 @@ import conf from "~/data/login/start_scene"
 
 
 export default class Start extends LoginScene {
-  name = "Start"
+    name = "Start"
 
-  conf = conf
+    conf = conf
 }
