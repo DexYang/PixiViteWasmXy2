@@ -297,7 +297,7 @@ void decode_mask(uint8_t* in, uint8_t* out, uint8_t* rgb, uint32_t x, uint32_t y
 	uint8_t* p = (uint8_t*) malloc(size * 2);
 	uint32_t size_temp = decompress_mask((uint8_t*)in, (uint8_t*)p);
 	uint32_t compressedMaskPos = 0;
-	uint32_t cross_col_num = (x + width) / 320;
+	uint32_t cross_col_num = (x + width) / 320 + (x + width) % 320 != 0 ? 1 : 0;
 
 	
 	for (uint32_t i = 0; i < height; i++) {

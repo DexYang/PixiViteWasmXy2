@@ -116,30 +116,30 @@ export abstract class GameScene extends Scene {
                 if (!block.requested) {
                     this.mapx.getJpeg(block_index)
                 } else if (block.texture) {
-                    const graphics = new Graphics()
-                    graphics.lineStyle(10, 0x00FF00, 1)
-                    graphics.beginFill(0xFFFFFF)
-                    graphics.drawRect(j * 320, i * 240, 320, 240)
-                    graphics.endFill()
-                    this.map_layer.addChild(graphics)
+                    // const graphics = new Graphics()
+                    // graphics.lineStyle(10, 0x00FF00, 1)
+                    // graphics.beginFill(0xFFFFFF)
+                    // graphics.drawRect(j * 320, i * 240, 320, 240)
+                    // graphics.endFill()
+                    // this.map_layer.addChild(graphics)
 
-                    const basicText = new Text(`${j * 320}, ${i * 240}`)
-                    basicText.x = j * 320
-                    basicText.y = i * 240
+                    // const basicText = new Text(`${j * 320}, ${i * 240}`)
+                    // basicText.x = j * 320
+                    // basicText.y = i * 240
                     
-                    const basicText1 = new Text(`${block_index}\n`+block.ownMasks.join(","), {
-                        fill: 0xff1010
-                    })
-                    basicText1.x = j * 320 + 100
-                    basicText1.y = i * 240 + 100
-                    this.map_layer.addChild(basicText1)
+                    // const basicText1 = new Text(`${block_index}\n`+block.ownMasks.join(","), {
+                    //     fill: 0xff1010
+                    // })
+                    // basicText1.x = j * 320 + 100
+                    // basicText1.y = i * 240 + 100
+                    // this.map_layer.addChild(basicText1)
 
-                    // const block_sprite = new Sprite(block.texture)
-                    // block_sprite.position.x = j * 320
-                    // block_sprite.position.y = i * 240
-                    // block_sprite.zOrder = 0
-                    // block_sprite.zIndex = 0
-                    // this.map_layer.addChild(block_sprite)
+                    const block_sprite = new Sprite(block.texture)
+                    block_sprite.position.x = j * 320
+                    block_sprite.position.y = i * 240
+                    block_sprite.zOrder = 0
+                    block_sprite.zIndex = 0
+                    this.map_layer.addChild(block_sprite)
                     block.texture = null
                     block.loaded = true
                 }
@@ -153,25 +153,25 @@ export abstract class GameScene extends Scene {
                         const mask_sprite = new Sprite(mask.texture)
                         mask_sprite.position.x = mask.x
                         mask_sprite.position.y = mask.y
-                        const graphics = new Graphics()
+                        // const graphics = new Graphics()
 
-                        graphics.lineStyle(2, 0xFFBD01, 1)
-                        graphics.drawRect(mask.x, mask.y, mask.width, mask.height)
-                        for (let ii = 0; ii < mask.sort_table.length; ii++) {
-                            graphics.drawCircle(mask.x + ii * mask.sample_gap, mask.y + mask.sort_table[ii], 2)
-                        }
+                        // graphics.lineStyle(2, 0xFFBD01, 1)
+                        // graphics.drawRect(mask.x, mask.y, mask.width, mask.height)
+                        // for (let ii = 0; ii < mask.sort_table.length; ii++) {
+                        //     graphics.drawCircle(mask.x + ii * mask.sample_gap, mask.y + mask.sort_table[ii], 2)
+                        // }
                         
-                        graphics.endFill()
+                        // graphics.endFill()
 
-                        const basicText = new Text(`${maskIndex}`)
-                        basicText.x = mask.x
-                        basicText.y = mask.y
+                        // const basicText = new Text(`${maskIndex}`)
+                        // basicText.x = mask.x
+                        // basicText.y = mask.y
                         mask_sprite.zOrder = mask.z
                         mask_sprite.zIndex = mask.z
                         mask_sprite.eventMode = "none"
-                        graphics.eventMode = "none"
-                        this.shape_layer.addChild(graphics)
-                        this.shape_layer.addChild(basicText)
+                        // graphics.eventMode = "none"
+                        // this.shape_layer.addChild(graphics)
+                        // this.shape_layer.addChild(basicText)
                         this.shape_layer.addChild(mask_sprite)
                         mask.texture = null
                         mask.loaded = true

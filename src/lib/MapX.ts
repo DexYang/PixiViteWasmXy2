@@ -493,10 +493,10 @@ export class MapX {
         const size = mask.size
 
         const start_col = Math.floor(mask.x / 320)
-        const end_col = Math.floor((mask.x + mask.width) / 320)
+        const end_col = Math.floor((mask.x + mask.width) / 320) - ((mask.x + mask.width) % 320 === 0 ? 1 : 0)
         const start_row = Math.floor(mask.y / 240)
-        const end_row = Math.floor((mask.y + mask.height) / 240)
-
+        const end_row = Math.floor((mask.y + mask.height) / 240) - ((mask.y + mask.height) % 240 === 0 ? 1 : 0)
+        
         const cross_blocks: Array<number> = []
         for (let row = start_row; row <= end_row; row++) {
             for (let col = start_col; col <= end_col; col++) {
@@ -504,6 +504,8 @@ export class MapX {
                 if (!this.blocks[row * this.col_num + col].decoded) return
             }
         }
+        if(i === 915) 
+            console.log("?")
         const cross_rgb = new Uint8Array(cross_blocks.length * 230400)
         for (let i = 0; i < cross_blocks.length; i++) {
             cross_rgb.set(this.blocks[cross_blocks[i]].RGB, i * 230400)
