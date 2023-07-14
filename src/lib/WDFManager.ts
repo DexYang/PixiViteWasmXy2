@@ -1,5 +1,6 @@
+import path from "path"
 import { WDF, getWDF } from "~/lib/WDF"
-import { Debug } from "~/utils/debug"
+import { WAS } from "./WAS"
 
 
 export class WDFManager {
@@ -13,7 +14,7 @@ export class WDFManager {
     }
 
     async get(wdf: string, path_or_hash: string | number) {
-        let wdf_instance
+        let wdf_instance: WDF | undefined
         if (!this.map.has(wdf)) {
             wdf_instance = await getWDF(wdf)
             this.map.set(wdf, wdf_instance)

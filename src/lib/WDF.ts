@@ -67,13 +67,12 @@ export class WDF {
             return
         }
         const file = this.file.slice(item.offset, item.offset  + item.size)
-        let buf: ArrayBuffer | null = await file.arrayBuffer()
+        const buf: ArrayBuffer | null = await file.arrayBuffer()
         if (this.readBufToStr(buf, 0, 2) === "SP") { // TCP TCA WAS
             return new WAS(buf)
         }
-    
-        buf = null
-        return null
+
+        return buf
     }
 
     readBufToStr(buf: ArrayBuffer, start: number, end: number): string {
