@@ -1,5 +1,6 @@
 import { Layer } from "@pixi/layers"
 import SceneManager from "./SceneManager"
+import { SoundManager } from "./SoundManager"
 
 export interface Scene {
   load?(): void | Promise<void>;
@@ -11,7 +12,8 @@ export interface Scene {
 export abstract class Scene extends Layer implements Scene{
   abstract name: string;
 
-  sm = SceneManager.getInstance()
+  scm = SceneManager.getInstance()
+  sdm = SoundManager.getInstance()
 
   constructor() {
       super()

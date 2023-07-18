@@ -34,7 +34,7 @@ export abstract class GameScene extends Scene {
         this.window = new Viewport({
             worldWidth: this.mapx.width,
             worldHeight: this.mapx.height,
-            events: this.sm.app.renderer.events
+            events: this.scm.app.renderer.events
         })
         this.window.dirty = true
         this.window.clamp({
@@ -102,7 +102,7 @@ export abstract class GameScene extends Scene {
     async start() {
 
         this.updateWindow()
-        this.sm.app.ticker.add(() => {
+        this.scm.app.ticker.add(() => {
             this.updateWindow()
         })
     }

@@ -67,6 +67,6 @@ export default class Loading extends Scene {
     async chooseLocalResources() {
         const res = ResourceLoader.getInstance()
         await res.load()
-        await this.sm.switchScene("Start")
+        await this.scm.switchScene("Start")
     }
 }

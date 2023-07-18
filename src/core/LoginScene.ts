@@ -5,7 +5,6 @@ import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { WDFManager } from "~/lib/WDFManager"
 import config from "~/config"
-import { FancyButton } from "@pixi/ui"
 import { Sound } from "@pixi/sound"
 import { WAS } from "~/lib/WAS"
 
@@ -14,6 +13,8 @@ export abstract class LoginScene extends Scene {
     bg_layer: Layer
     ui_layer: Layer
     container: Container
+
+    bgm: Sound
 
     conf: Record<string, any>
 
@@ -70,53 +71,5 @@ export abstract class LoginScene extends Scene {
         }
 
         this.container.addChild(this.bg_layer)
-
-
-        this.ui_layer = new Layer()
-        this.ui_layer.zIndex = 0
-        this.ui_layer.zOrder = 0
-
-        for (const key in res["buttons"]) {
-            const value = res["buttons"][key]
-            const was = await wdfManager.get(value["wdf"], value["was_hash"])
-            if (was instanceof WAS) {
-                const btn = new FancyButton({
-                    defaultView: new Sprite(was.readFrames()[0][0].texture),
-                    pressedView: new Sprite(was.readFrames()[0][1].texture),
-                    hoverView: new Sprite(was.readFrames()[0][2].texture),
-                })
-                btn.position.set(value["x"], value["y"])
-                if (key === "进入游戏") {
-                    btn.onPress.connect(async () => {
-                        await this.playSound(wdfManager, "sound.wdf", "0x4F8F2281")
-                        await this.sm.switchScene("World")
-                    })
-                } else if (key === "注册账号") {
-                    btn.onPress.connect(async () =>  {
-                        await this.playSound(wdfManager, "sound.wdf", "0x4F8F2281")
-                        alert("注册账号")
-                    })
-                } else if (key === "退出游戏") {
-                    btn.onPress.connect(async () => {
-                        await this.playSound(wdfManager, "sound.wdf", "0x4F8F2281")
-                        await this.sm.switchScene("Loading")
-                    })
-                }
-                this.ui_layer.addChild(btn)
-            }
-        }
-
-        this.container.addChild(this.ui_layer)
-
-
-        this.playSound(wdfManager, "gires2.wdf", "0xF7426640", true)
-    }
-
-    async playSound(wdfManager, wdf, hash, loop=false) {
-        const mp3 = await wdfManager.get(wdf, hash)
-        if (mp3 && mp3 instanceof ArrayBuffer) {
-            const sound = Sound.from(mp3)
-            sound.play({ loop: loop })
-        }
     }
 }

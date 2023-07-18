@@ -1,5 +1,6 @@
 import { AnimatedSprite, Container } from "pixi.js"
 import config from "~/config"
+import { WAS } from "~/lib/WAS"
 import { WDFManager } from "~/lib/WDFManager"
 import SceneManager from "./SceneManager"
 
@@ -25,7 +26,7 @@ export class Cursor extends Container {
 
     mode: string
 
-    sm = SceneManager.getInstance()
+    scm = SceneManager.getInstance()
 
     constructor() {
         super()
@@ -37,7 +38,7 @@ export class Cursor extends Container {
         const wdfManager = WDFManager.getInstance()
         for (const mode in modes) {
             const was = await wdfManager.get(modes[mode][0], modes[mode][1])
-            if (was !== undefined) {
+            if (was instanceof WAS) {
                 const frames = was.readFrames(config.ui_duration)[0]
                 const ani = new AnimatedSprite(frames, true)
                 this.modes[mode] = ani
@@ -48,20 +49,20 @@ export class Cursor extends Container {
                 ani.eventMode = "none"
                 this.addChild(ani)
             }
-            this.sm.app.renderer.events.cursorStyles[mode] = (mode: string) => {
+            this.scm.app.renderer.events.cursorStyles[mode] = (mode: string) => {
                 this.modes[this.mode].visible = false
                 this.mode = mode
                 this.modes[mode].visible = true
             }
         }
     
-        this.sm.app.stage.eventMode = "auto"
-        this.sm.app.stage.hitArea = this.sm.app.screen
+        this.scm.app.stage.eventMode = "auto"
+        this.scm.app.stage.hitArea = this.scm.app.screen
 
-        this.sm.app.renderer.events.domElement.style.cursor = "none"
+        this.scm.app.renderer.events.domElement.style.cursor = "none"
 
-        this.sm.app.ticker.add(() => {
-            this.position = this.sm.app.renderer.events.pointer
+        this.scm.app.ticker.add(() => {
+            this.position = this.scm.app.renderer.events.pointer
         })
         return
     }
