@@ -7,7 +7,7 @@
     "tsc": "tsc",
     "preview": "vite preview",
     "lint": "eslint ./src --fix",
-    "wasm": "emcc -O2 wasmxy2/entry.cpp -s EXPORTED_FUNCTIONS=\"['_read_map_x', '_read_map_1', '_read_mask', '_get_hash', '_read_color_pal', '_read_frame', '_malloc', '_free', '_printf']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -o ./public/wasmxy2.js "
+    "wasm": "emcc -O2 wasmxy2/entry.cpp -s EXPORTED_FUNCTIONS=\"['_read_map_x', '_read_map_1', '_read_mask', '_read_mask_blend', '_get_hash', '_read_color_pal', '_read_frame', '_malloc', '_free', '_printf']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -o ./public/wasmxy2.js "
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.49.0",

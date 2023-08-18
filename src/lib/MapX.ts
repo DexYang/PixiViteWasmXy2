@@ -1,5 +1,5 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
-import { Texture, FORMATS, Point } from "pixi.js"
+import { Texture, FORMATS, Point, Sprite } from "pixi.js"
 import { WorkerManager } from "./WorkerManager"
 import PF from "pathfinding"
 
@@ -300,7 +300,7 @@ export class MapX {
         mask.size = size - 16
 
         const key = mask.x * 10000 + mask.y
-        if (key in this.no_repeat) {
+        if (!(key in this.no_repeat)) {
             const id = Object.keys(this.no_repeat).length
             this.no_repeat[key] = id
             this.blocks[blockIndex].ownMasks.push(id)
@@ -504,8 +504,6 @@ export class MapX {
                 if (!this.blocks[row * this.col_num + col].decoded) return
             }
         }
-        if(i === 915) 
-            console.log("?")
         const cross_rgb = new Uint8Array(cross_blocks.length * 230400)
         for (let i = 0; i < cross_blocks.length; i++) {
             cross_rgb.set(this.blocks[cross_blocks[i]].RGB, i * 230400)

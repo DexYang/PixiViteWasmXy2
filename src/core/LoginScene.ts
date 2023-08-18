@@ -18,7 +18,7 @@ export abstract class LoginScene extends Scene {
 
     conf: Record<string, any>
 
-    onResize(): void {
+    onResize(): void { 
         this.container.x = Math.max((window.innerWidth - 640) / 2, 0)
         this.container.y = Math.max((window.innerHeight - 480) / 2, 0)
     }

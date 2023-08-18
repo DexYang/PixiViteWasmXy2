@@ -1,6 +1,5 @@
 import { ResourceLoader } from "~/core/ResourceLoader"
 import { Debug } from "../utils/debug"
-import { AnimatedSprite, FrameObject } from "pixi.js"
 import { WorkerManager } from "./WorkerManager"
 import { WAS } from "./WAS"
 

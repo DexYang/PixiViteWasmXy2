@@ -22,6 +22,10 @@ void EMSCRIPTEN_KEEPALIVE read_mask(uint8_t* in, uint8_t* out, uint8_t* rgb, uin
     decode_mask(in, out, rgb, x, y, width, height);
 }
 
+void EMSCRIPTEN_KEEPALIVE read_mask_blend(uint8_t* in, uint8_t* out, uint32_t width, uint32_t height) {
+    decode_mask_blend(in, out, width, height);
+}
+
 void EMSCRIPTEN_KEEPALIVE get_hash(char* p, uint32_t* out) {
     *out = StringId(StringAdjust(p));
 }

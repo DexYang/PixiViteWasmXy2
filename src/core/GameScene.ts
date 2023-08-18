@@ -4,7 +4,7 @@ import { Viewport } from "pixi-viewport"
 import { ResourceLoader } from "./ResourceLoader"
 import { Debug } from "~/utils/debug"
 import { getMapX, MapX } from "~/lib/MapX"
-import { Graphics, Sprite, Text } from "pixi.js"
+import { Sprite } from "pixi.js"
 import { Character, get_character } from "./Character"
 
 
@@ -29,7 +29,7 @@ export abstract class GameScene extends Scene {
             Debug.log("直读资源未加载")
             return
         }
-        this.mapx = await getMapX("newscene/1410.map")
+        this.mapx = await getMapX("scene/1001.map")
 
         this.window = new Viewport({
             worldWidth: this.mapx.width,
@@ -50,6 +50,9 @@ export abstract class GameScene extends Scene {
         this.window.addChild(this.map_layer)
         
         this.shape_layer = new Layer()
+        this.shape_layer.alpha = 1
+        this.shape_layer.useDoubleBuffer = true
+        this.shape_layer.group.useRenderTexture
         this.shape_layer.zIndex = 1
         this.shape_layer.sortableChildren = true
         this.shape_layer.group.enableSort = true
@@ -79,7 +82,7 @@ export abstract class GameScene extends Scene {
 
         
         const c = await get_character(1)
-        c.position.set(500, 500)
+        c.position.set(1500, 1500)
         // const basicText = new Text("???")
         // basicText.name = "test"
         // basicText.x = 0
@@ -87,6 +90,10 @@ export abstract class GameScene extends Scene {
         // c.addChild(basicText)
         this.player = c
         this.shape_layer.addChild(c)
+
+        const d = await get_character(2)
+        d.position.set(1550, 1550)
+        this.shape_layer.addChild(d)
 
         this.window.follow(c)
 
@@ -150,28 +157,43 @@ export abstract class GameScene extends Scene {
                     if (!mask.requested) {
                         this.mapx.getMask(maskIndex)
                     } else if (mask.texture) {
-                        const mask_sprite = new Sprite(mask.texture)
-                        mask_sprite.position.x = mask.x
-                        mask_sprite.position.y = mask.y
-                        // const graphics = new Graphics()
+                        // ****
+                        // const start_col = Math.floor(mask.x / 320)
+                        // const end_col = Math.floor((mask.x + mask.width) / 320) - ((mask.x + mask.width) % 320 === 0 ? 1 : 0)
+                        // const start_row = Math.floor(mask.y / 240)
+                        // const end_row = Math.floor((mask.y + mask.height) / 240) - ((mask.y + mask.height) % 240 === 0 ? 1 : 0)
+        
+                        // const cross_blocks: Array<number> = []
+                        // for (let row = start_row; row <= end_row; row++) {
+                        //     for (let col = start_col; col <= end_col; col++) {
+                        //         cross_blocks.push(row * this.mapx.col_num + col)
+                        //     }
+                        // }
+                        // ****
+                        // const basicText = new Text(`${maskIndex} - ${ mask.x - start_col * 320 + mask.width} - ${(mask.x - start_col * 320 + mask.width) / 320} - ${(mask.x - start_col * 320 + mask.width) % 320 != 0 ? 1 : 0} + ${ (mask.x - start_col * 320 + mask.width) / 320 + ((mask.x - start_col * 320 + mask.width) % 320 != 0 ? 1 : 0)} : ${cross_blocks.join(",")}`)
+                        // basicText.x = mask.x
+                        // basicText.y = mask.y
 
+                        
+                        // const graphics = new Graphics()
                         // graphics.lineStyle(2, 0xFFBD01, 1)
-                        // graphics.drawRect(mask.x, mask.y, mask.width, mask.height)
+                        // graphics.drawRect(0, 0, mask.width, mask.height)
                         // for (let ii = 0; ii < mask.sort_table.length; ii++) {
                         //     graphics.drawCircle(mask.x + ii * mask.sample_gap, mask.y + mask.sort_table[ii], 2)
                         // }
-                        
                         // graphics.endFill()
 
-                        // const basicText = new Text(`${maskIndex}`)
-                        // basicText.x = mask.x
-                        // basicText.y = mask.y
+                        // graphics.eventMode = "none"
+                        // mask_sprite.addChild(graphics)
+                        // this.shape_layer.addChild(basicText)
+                        const mask_sprite = new Sprite(mask.texture)
+                        mask_sprite.position.x = mask.x
+                        mask_sprite.position.y = mask.y
+
                         mask_sprite.zOrder = mask.z
                         mask_sprite.zIndex = mask.z
                         mask_sprite.eventMode = "none"
-                        // graphics.eventMode = "none"
-                        // this.shape_layer.addChild(graphics)
-                        // this.shape_layer.addChild(basicText)
+                        
                         this.shape_layer.addChild(mask_sprite)
                         mask.texture = null
                         mask.loaded = true
