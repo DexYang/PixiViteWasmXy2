@@ -21,7 +21,7 @@ export abstract class GameScene extends Scene {
     window: Viewport
   
     onResize(): void {
-        console.log(window.innerWidth, window.innerHeight)
+        this.window.resize()
     }
 
     async load() {
