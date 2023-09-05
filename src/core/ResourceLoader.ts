@@ -10,6 +10,8 @@ export class ResourceLoader {
 
     exploreFiles = ["scene", "newscene", "font"]
 
+    saveFiles = ["save"]
+
     private constructor() {
         this.resources = new Map<string, FileSystemFileHandle>()
     }
@@ -38,6 +40,10 @@ export class ResourceLoader {
             }
         })
         this.loaded = true
+    }
+
+    async save(json: string) {
+        console.log(json)
     }
 
     isLoaded() { return this.loaded }

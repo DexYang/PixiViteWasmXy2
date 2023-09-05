@@ -13,6 +13,7 @@ class Block {
     jpegSize: number
     texture: Texture | null
     RGB: Uint8Array
+    PNG = false
     requested = false
     decoded = false
     loaded = false
@@ -52,7 +53,6 @@ class Mask {
     calc_sort_z(x: number, y: number) {
         if (this.sort_table.length <= 0) 
             return false
-        // console.log(this.x, this.y, this.sort_table)
         if (y > this.y && y < this.z) {
             if (x > this.x - 20 && x < this.x + this.width + 20) {
                 const rx = x - this.x
@@ -268,6 +268,11 @@ export class MapX {
                     block.jpegOffset = offset
                     block.jpegSize = size
                     offset += size
+                } else if (flag.substring(0, 3) === "GNP") {
+                    block.jpegOffset = offset
+                    block.jpegSize = size
+                    offset += size
+                    block.PNG = true
                 } else if (flag === "KSAM" || flag === "2SAM") {
                     this.read_old_mask(offset, size, i)
                     offset += size
@@ -415,10 +420,6 @@ export class MapX {
         return newPath
     }
 
-    // read_old_mask(offset: number, size: number, block_index: number) {
-    //   // const mask = new Mask()
-    // }
-
     getJpeg(i: number) {
         const block = this.blocks[i]
         let jpeg 
@@ -429,7 +430,7 @@ export class MapX {
             const uint8Array = new Uint8Array(size)
             uint8Array.set(new Uint8Array(this.jpeg_head))
             uint8Array.set(new Uint8Array(jpeg), this.jpeg_head.byteLength)
-            // uint8Array.byteLength
+
             this.wm?.post({
                 method: "getMapx",
                 data: uint8Array,
@@ -451,16 +452,15 @@ export class MapX {
       
             // Module._free(inBuffer)
             // Module._free(outBuffer)
-        } else if (this.flag === "0.1M") {
+        } else if (this.flag === "0.1M" && !block.PNG) {
             const uint8Array = new Uint8Array(jpeg)
 
             this.wm?.post({
-                method: "getJpeg",
+                method: block.PNG ? "getPNG" : "getJpeg" ,
                 data: uint8Array,
                 blockIndex: i,
                 id: this.id
             })
-            // const start1 = performance.now()
       
             // const inBuffer = Module._malloc(uint8Array.length)
             // Module.HEAP8.set(uint8Array, inBuffer)
@@ -476,7 +476,6 @@ export class MapX {
             // Module._free(inBuffer)
             // Module._free(outBuffer)
             // const end1 = performance.now()
-            // console.log("readU32 cost is", `${end1 - start1}ms`)
         }
         jpeg = null
         block.requested = true

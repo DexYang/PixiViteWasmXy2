@@ -1,0 +1,14 @@
+{
+    "name": "大话西游II",
+    "short_name": "大话西游II",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fff",
+    "description": "大话西游II",
+    "icons": [
+      {
+        "src": "/icon.png",
+        "sizes": "128x128"
+      }
+    ]
+  }

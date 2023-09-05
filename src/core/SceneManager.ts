@@ -85,13 +85,13 @@ export default class SceneManager {
         }, {} as Record<string, ConstructorType<typeof Scene>>)
     }
 
-    async switchScene(sceneName: string, deletePrevious = true): Promise<Scene> {
+    async switchScene(sceneName: string, map_id?: string, deletePrevious = true): Promise<Scene> {
         await this.removeScene(deletePrevious)
         await this.loadCursor()
 
         this.currentScene = this.sceneInstances.get(sceneName)
 
-        if (!this.currentScene) this.currentScene = await this.initScene(sceneName)
+        if (!this.currentScene) this.currentScene = await this.initScene(sceneName, map_id)
 
         if (!this.currentScene)
             throw new Error(`Failed to initialize scene: ${sceneName}`)
@@ -121,14 +121,12 @@ export default class SceneManager {
         this.currentScene = undefined
     }
 
-    private async initScene(sceneName: string) {
-
-
+    private async initScene(sceneName: string, map_id?: string) {
         const scene = new this.sceneConstructors[sceneName]()
 
         this.sceneInstances.set(sceneName, scene)
 
-        if (scene.load) await scene.load()
+        if (scene.load) await scene.load(map_id)
 
         return scene
     }

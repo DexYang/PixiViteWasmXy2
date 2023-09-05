@@ -24,12 +24,12 @@ export abstract class GameScene extends Scene {
         this.window.resize()
     }
 
-    async load() {
+    async load(map_id: string) {
         if (!ResourceLoader.getInstance().loaded) {
             Debug.log("直读资源未加载")
             return
         }
-        this.mapx = await getMapX("scene/1001.map")
+        this.mapx = await getMapX(map_id)
 
         this.window = new Viewport({
             worldWidth: this.mapx.width,
@@ -82,7 +82,7 @@ export abstract class GameScene extends Scene {
 
         
         const c = await get_character(1)
-        c.position.set(1500, 1500)
+        c.position.set(1400, 1400)
         // const basicText = new Text("???")
         // basicText.name = "test"
         // basicText.x = 0
@@ -121,7 +121,19 @@ export abstract class GameScene extends Scene {
                 const block_index = i * this.mapx.col_num + j
                 const block = this.mapx.blocks[block_index]
                 if (!block.requested) {
+                    // if (block.PNG) {
+                    //     const png_data = this.mapx.buf.slice(block.jpegOffset, block.jpegOffset + block.jpegSize)
+                    //     const png_blob = new Blob([png_data])
+                    //     createImageBitmap(png_blob).then((png_bitmap: ImageBitmap) => {
+                    //         block.texture = Texture.from(png_bitmap)
+                    //         png_bitmap.close()
+                    //     })
+                    //     block.RGB = new Uint8Array(320*240*3)
+                    //     block.decoded = true
+                    // }
                     this.mapx.getJpeg(block_index)
+                    // Texture.from
+                    
                 } else if (block.texture) {
                     // const graphics = new Graphics()
                     // graphics.lineStyle(10, 0x00FF00, 1)
@@ -189,7 +201,7 @@ export abstract class GameScene extends Scene {
                         const mask_sprite = new Sprite(mask.texture)
                         mask_sprite.position.x = mask.x
                         mask_sprite.position.y = mask.y
-
+                        // mask_sprite.blendMode = 30
                         mask_sprite.zOrder = mask.z
                         mask_sprite.zIndex = mask.z
                         mask_sprite.eventMode = "none"

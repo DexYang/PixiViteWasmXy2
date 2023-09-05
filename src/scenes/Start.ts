@@ -24,7 +24,7 @@ export default class Start extends LoginScene {
                 btn.position.set(value["x"], value["y"])
                 if (key === "进入游戏") {
                     btn.onPress.connect(async () => {
-                        await this.scm.switchScene("World")
+                        await this.scm.switchScene("World", "newscene/1410.map")
                     })
                 } else if (key === "注册账号") {
                     btn.onPress.connect(async () =>  {

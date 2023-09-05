@@ -3,7 +3,7 @@ import SceneManager from "./SceneManager"
 import { SoundManager } from "./SoundManager"
 
 export interface Scene {
-  load?(): void | Promise<void>;
+  load?(map_id?: string): void | Promise<void>;
   unload?(): void | Promise<void>;
   start?(): void | Promise<void>;
   onResize?(width: number, height: number): void;
