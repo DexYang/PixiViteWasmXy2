@@ -23,5 +23,5 @@
 			"~/*": ["src/*"]
 		}
 	},
-	"include": ["src", "public/wasmxy2.js"]
+	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite-env.d.ts"],
 }
